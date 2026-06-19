@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { writeFile } from "fs/promises"
-import path from "path"
-import { mkdir } from "fs/promises"
+import { storeUploadedFile } from "@/lib/upload-storage"
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,22 +35,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    const userId = session.user.id
-    const uploadDir = path.join(process.cwd(), "public", "uploads", userId)
-
-    await mkdir(uploadDir, { recursive: true })
-
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
-    const ext = path.extname(file.name) || ".bin"
-    const filename = `${uniqueSuffix}${ext}`
-    const filepath = path.join(uploadDir, filename)
-
-    await writeFile(filepath, buffer)
-
-    const url = `/uploads/${userId}/${filename}`
+    const url = await storeUploadedFile(session.user.id, file)
 
     return NextResponse.json({ url }, { status: 201 })
   } catch (error) {
