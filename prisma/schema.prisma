@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memorials Memorial[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Memorial {
+  id             String   @id @default(cuid())
+  userId         String
+  slug           String   @unique
+  name           String
+  dob            DateTime?
+  dod            DateTime?
+  tagline        String?
+  bio            String?
+  coverPhotoUrl  String?
+  restingPlace   String?
+  songUrl        String?
+  songEmbedUrl   String?
+  songTitle      String?
+  songArtist     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos         Photo[]
+  videos         Video[]
+  guestbookEntries GuestbookEntry[]
+  tributes       Tribute[]
+  timelineEvents TimelineEvent[]
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  memorialId String
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  memorial  Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  memorialId String
+  embedUrl  String
+  title     String?
+  createdAt DateTime @default(now())
+
+  memorial  Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+}
+
+model GuestbookEntry {
+  id         String   @id @default(cuid())
+  memorialId String
+  visitorName String
+  message    String
+  approved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  memorial   Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+}
+
+model Tribute {
+  id         String   @id @default(cuid())
+  memorialId String
+  kind       String
+  visitorName String?
+  note       String?
+  createdAt  DateTime @default(now())
+
+  memorial   Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+}
+
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  memorialId  String
+  eventDate   DateTime?
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  memorial    Memorial @relation(fields: [memorialId], references: [id], onDelete: Cascade)
+}
