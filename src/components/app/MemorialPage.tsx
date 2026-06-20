@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
@@ -19,10 +19,27 @@ import {
   Heart, Instagram, Facebook, CheckCircle2,
 } from "lucide-react"
 import { formatDate, formatRelativeTime } from "@/lib/slug"
-import { useNavigation } from "@/lib/store"
 import { SongEmbed, SongAudioPlayer } from "@/components/app/SongEmbed"
 import { LifeTimeline } from "@/components/app/LifeTimeline"
 import { MemorialHeroDots, MemorialContentDots } from "@/components/app/MemorialHeroDots"
+
+const loaderExit = { opacity: 0, transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } }
+
+function MemorialLoadingScreen() {
+  return (
+    <div className="relative h-full w-full flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#141210] via-[#1a1814] to-[#141210]">
+      <div className="absolute inset-0 bg-grain opacity-40" />
+      <div className="relative z-10 flex flex-col items-center gap-4">
+        <Heart className="w-4 h-4 text-primary/35 animate-pulse-soft" strokeWidth={1.75} />
+        <div
+          className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary/70 animate-spin"
+          role="status"
+          aria-label="Loading memorial"
+        />
+      </div>
+    </div>
+  )
+}
 
 interface MemorialData {
   id: string
@@ -46,7 +63,7 @@ interface MemorialData {
 }
 
 export function MemorialPage({ slug }: { slug: string }) {
-  const { navigate } = useNavigation()
+  const router = useRouter()
   const [data, setData] = useState<MemorialData | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -247,52 +264,45 @@ export function MemorialPage({ slug }: { slug: string }) {
     return null
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <div className="relative h-[80vh] sm:h-[70vh] overflow-hidden bg-gradient-to-b from-[#141210] via-[#1a1814] to-background">
-          <div className="absolute inset-0 bg-grain opacity-40" />
-          <div className="relative z-10 flex h-full flex-col justify-end max-w-2xl mx-auto w-full px-6 pb-12 sm:pb-16">
-            <Skeleton tone="dark" className="h-3 w-36 mb-3 rounded" />
-            <Skeleton tone="dark" className="h-12 sm:h-14 w-56 sm:w-72 mb-4 rounded-lg" />
-            <Skeleton tone="dark" className="h-5 w-40 rounded" />
-          </div>
-        </div>
-        <div className="max-w-2xl mx-auto w-full px-6 py-8 space-y-6 flex-1">
-          <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-48 rounded-2xl" />
-        </div>
-      </div>
-    )
-  }
-
-  if (notFound || !data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-6 bg-grain">
-        <div className="text-center max-w-sm">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/[0.06] border border-primary/10 mb-6">
-            <Heart className="w-8 h-8 text-primary/40" />
-          </div>
-          <h1 className="font-serif text-3xl font-bold mb-3">Memorial not found</h1>
-          <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-            This memorial may have been removed or the link is incorrect.
-          </p>
-          <Button
-            onClick={() => window.location.reload()}
-            className="bg-primary text-primary-foreground hover:opacity-90 rounded-full px-6"
-          >
-            Go to StillHere
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  const photos = data.photos ?? []
+  const photos = data?.photos ?? []
   const activePhoto = photos[currentPhoto]
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-dvh bg-[#141210]">
+      {!loading && (notFound || !data) && (
+        <motion.div
+          key="memorial-not-found"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="min-h-dvh flex items-center justify-center px-6 bg-grain"
+        >
+          <div className="text-center max-w-sm">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/[0.06] border border-primary/10 mb-6">
+              <Heart className="w-8 h-8 text-primary/40" />
+            </div>
+            <h1 className="font-serif text-3xl font-bold mb-3">Memorial not found</h1>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-8">
+              This memorial may have been removed or the link is incorrect.
+            </p>
+            <Button
+              onClick={() => router.push("/")}
+              className="bg-primary text-primary-foreground hover:opacity-90 rounded-full px-6"
+            >
+              Go to StillHere
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {!loading && data && (
+        <motion.div
+          key={`memorial-${slug}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
+          className="min-h-dvh flex flex-col"
+        >
       {/* Sticky Nav */}
       <AnimatePresence>
         {showStickyNav && (
@@ -303,9 +313,9 @@ export function MemorialPage({ slug }: { slug: string }) {
             className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border/50"
           >
             <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">In loving memory of</p>
-                <p className="font-serif text-lg font-semibold">{data.name}</p>
+              <div className="memorial-sticky-heading min-w-0">
+                <p className="memorial-sticky-epigraph">In loving memory of</p>
+                <p className="font-serif text-lg font-semibold truncate">{data.name}</p>
               </div>
               <Button variant="outline" size="sm" onClick={handleCopyLink} className="gap-1.5">
                 <Share2 className="w-3.5 h-3.5" />
@@ -322,15 +332,23 @@ export function MemorialPage({ slug }: { slug: string }) {
           {/* Cover Photo */}
           {data.coverPhotoUrl ? (
             <>
-              <img
+              <motion.img
                 src={data.coverPhotoUrl}
                 alt=""
+                initial={{ opacity: 0, scale: 1.04 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 hero-overlay" />
             </>
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-b from-[#141210] via-[#1a1814] to-[#141210]" />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+              className="absolute inset-0 bg-gradient-to-b from-[#141210] via-[#1a1814] to-[#141210]"
+            />
           )}
           <div className="absolute inset-0 bg-grain" />
           <MemorialHeroDots />
@@ -338,28 +356,33 @@ export function MemorialPage({ slug }: { slug: string }) {
           {/* Hero Content */}
           <div className="relative z-10 w-full max-w-2xl mx-auto px-6 pb-12 sm:pb-16">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 0.85, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="memorial-hero-copy"
             >
-              <p className="text-sm text-muted-foreground/80 mb-2 tracking-wide">In loving memory of</p>
-              <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-gradient-warm mb-4 leading-tight">
+              <p className="memorial-hero-epigraph">In loving memory of</p>
+              <h1 className="memorial-hero-name text-4xl sm:text-5xl md:text-6xl font-bold text-gradient-warm">
                 {data.name}
               </h1>
-              {getDateRange() && (
-                <p className="text-base sm:text-lg text-muted-foreground mb-3">
-                  {getDateRange()}
-                </p>
-              )}
-              {data.tagline && (
-                <p className="text-base text-muted-foreground/90 italic max-w-lg">
-                  &ldquo;{data.tagline}&rdquo;
-                </p>
-              )}
-              {data.restingPlace && (
-                <p className="text-sm text-muted-foreground/70 mt-2">
-                  Resting at {data.restingPlace}
-                </p>
+              {(getDateRange() || data.tagline || data.restingPlace) && (
+                <div className="memorial-hero-meta">
+                  {getDateRange() && (
+                    <p className="memorial-hero-dates">{getDateRange()}</p>
+                  )}
+                  {data.tagline && (
+                    <p className="memorial-hero-tagline">&ldquo;{data.tagline}&rdquo;</p>
+                  )}
+                  {data.restingPlace && (
+                    <p className="memorial-hero-resting">
+                      <span className="memorial-hero-resting-label">Resting at</span>
+                      <span className="memorial-hero-resting-sep" aria-hidden="true">
+                        ·
+                      </span>
+                      <span className="memorial-hero-resting-place">{data.restingPlace}</span>
+                    </p>
+                  )}
+                </div>
               )}
             </motion.div>
           </div>
@@ -367,7 +390,7 @@ export function MemorialPage({ slug }: { slug: string }) {
       </section>
 
       {/* Main Content + Footer */}
-      <div className="relative flex-1 flex flex-col">
+      <div className="relative flex-1 flex flex-col bg-background">
         <MemorialContentDots />
 
         <main className="relative z-10 flex-1">
@@ -375,9 +398,9 @@ export function MemorialPage({ slug }: { slug: string }) {
 
           {/* Tributes Bar */}
           <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.65, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="py-8"
           >
             <div className="bg-card border border-border/50 rounded-2xl p-5 sm:p-6 shadow-lg shadow-primary/5">
@@ -761,7 +784,7 @@ export function MemorialPage({ slug }: { slug: string }) {
         <div className="max-w-2xl mx-auto text-center">
           <button
             type="button"
-            onClick={() => navigate({ page: "landing" })}
+            onClick={() => router.push("/")}
             className="font-serif text-xl font-semibold text-gradient-warm hover:opacity-80 transition-opacity"
           >
             StillHere
@@ -824,6 +847,20 @@ export function MemorialPage({ slug }: { slug: string }) {
         </DialogContent>
       </Dialog>
       )}
+        </motion.div>
+      )}
+
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            key="memorial-loading"
+            className="fixed inset-0 z-50"
+            exit={loaderExit}
+          >
+            <MemorialLoadingScreen />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

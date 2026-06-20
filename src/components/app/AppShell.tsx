@@ -1,7 +1,7 @@
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
-import { useNavigation } from "@/lib/store"
+import { useNavigation, type AppRoute } from "@/lib/store"
 import { LandingPage } from "./LandingPage"
 import { LoginPage } from "./LoginPage"
 import { SignupPage } from "./SignupPage"
@@ -13,6 +13,12 @@ import { SettingsPage } from "./SettingsPage"
 import { ForgotPasswordPage } from "./ForgotPasswordPage"
 import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
+
+function routeKey(route: AppRoute) {
+  if (route.page === "memorial") return `memorial-${route.slug}`
+  if (route.page === "edit-memorial") return `edit-${route.memorialId}`
+  return route.page
+}
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -33,6 +39,19 @@ export function AppShell() {
       navigate({ page: "login" })
       window.history.replaceState({}, "", "/")
     }
+  }, [navigate])
+
+  useEffect(() => {
+    const onPopState = () => {
+      const match = window.location.pathname.match(/^\/memorial\/([^/]+)\/?$/)
+      if (match) {
+        navigate({ page: "memorial", slug: decodeURIComponent(match[1]) })
+      } else if (useNavigation.getState().route.page === "memorial") {
+        navigate({ page: "landing" })
+      }
+    }
+    window.addEventListener("popstate", onPopState)
+    return () => window.removeEventListener("popstate", onPopState)
   }, [navigate])
 
   useEffect(() => {
@@ -92,7 +111,7 @@ export function AppShell() {
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={route.page}
+        key={routeKey(route)}
         variants={pageVariants}
         initial={hasNavigatedOnce.current ? false : "initial"}
         animate="animate"

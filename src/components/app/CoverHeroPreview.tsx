@@ -58,7 +58,7 @@ function HeroFrame({
       <div className="absolute inset-0 hero-overlay" />
       <div className="absolute inset-0 bg-grain opacity-40 pointer-events-none" />
       <div className={cn("relative z-10 w-full", isMobile ? "px-2.5 pb-3" : "px-3.5 pb-3.5")}>
-        <p className="text-[6px] text-muted-foreground/80 tracking-wide mb-0.5 sm:text-[7px]">
+        <p className="font-sans text-[6px] tracking-wide text-[rgba(245,240,232,0.58)] mb-0.5 sm:text-[7px]">
           In loving memory of
         </p>
         <h1

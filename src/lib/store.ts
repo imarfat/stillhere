@@ -11,6 +11,22 @@ export type AppRoute =
   | { page: "memorial"; slug: string }
   | { page: "settings" }
 
+function syncUrlForRoute(route: AppRoute) {
+  if (typeof window === "undefined") return
+
+  if (route.page === "memorial") {
+    const path = `/memorial/${encodeURIComponent(route.slug)}`
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, "", path)
+    }
+    return
+  }
+
+  if (/^\/memorial\/.+/.test(window.location.pathname)) {
+    window.history.replaceState(null, "", "/")
+  }
+}
+
 interface NavigationState {
   route: AppRoute
   history: AppRoute[]
@@ -21,19 +37,20 @@ interface NavigationState {
 export const useNavigation = create<NavigationState>((set) => ({
   route: { page: "landing" },
   history: [],
-  navigate: (route) =>
+  navigate: (route) => {
+    syncUrlForRoute(route)
     set((state) => ({
       route,
       history: [...state.history, state.route],
-    })),
+    }))
+  },
   back: () =>
     set((state) => {
       const history = [...state.history]
       const previous = history.pop()
-      return {
-        route: previous || { page: "landing" },
-        history,
-      }
+      const route = previous || { page: "landing" }
+      syncUrlForRoute(route)
+      return { route, history }
     }),
 }))
 
