@@ -73,10 +73,10 @@ export function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-8 relative overflow-hidden">
       {/* Decorative background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03] max-sm:to-primary/[0.015]" />
       <div className="absolute inset-0 bg-grain" />
-      <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-primary/[0.03] rounded-full blur-[100px]" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-flower/[0.02] rounded-full blur-[80px]" />
+      <div className="absolute top-1/4 right-1/4 max-sm:left-1/2 max-sm:right-auto max-sm:-translate-x-1/2 w-[400px] h-[400px] max-sm:w-[240px] max-sm:h-[240px] bg-primary/[0.03] max-sm:bg-primary/[0.012] rounded-full blur-[100px] max-sm:blur-[70px]" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] max-sm:hidden bg-flower/[0.02] rounded-full blur-[80px]" />
       <AuthFloatingDots />
 
       <motion.div
@@ -193,7 +193,7 @@ export function SignupPage() {
               </div>
               <Button
                 type="submit"
-                className="w-full h-10 bg-primary text-primary-foreground hover:opacity-90 rounded-xl text-sm font-medium shadow-md shadow-primary/10 btn-glow"
+                className="w-full h-10 bg-primary text-primary-foreground hover:opacity-90 rounded-xl text-sm font-medium max-sm:shadow-sm max-sm:shadow-primary/10 sm:shadow-md sm:shadow-primary/10 sm:btn-glow"
                 disabled={loading}
               >
                 {loading ? (

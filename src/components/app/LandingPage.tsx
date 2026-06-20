@@ -75,14 +75,14 @@ export function LandingPage() {
       {/* ── Hero ── */}
       <section className="hero-section relative min-h-screen px-6 overflow-hidden">
         {/* Background layers */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.06]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.06] max-sm:to-primary/[0.03]" />
         <HeroLineArt />
         <div className="absolute inset-0 bg-grain" />
 
-        {/* Radial ambient glow */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/[0.04] rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/[0.03] rounded-full blur-[100px]" />
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-flower/[0.02] rounded-full blur-[80px]" />
+        {/* Radial ambient glow — toned down on mobile */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] max-sm:w-[260px] max-sm:h-[260px] bg-primary/[0.04] max-sm:bg-primary/[0.015] rounded-full blur-[120px] max-sm:blur-[70px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] max-sm:hidden bg-accent/[0.03] rounded-full blur-[100px]" />
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] max-sm:hidden bg-flower/[0.02] rounded-full blur-[80px]" />
 
         {/* Decorative floating elements */}
         <div className="absolute top-[20%] left-[10%] w-1 h-1 rounded-full bg-primary/30 animate-float" />
@@ -103,11 +103,11 @@ export function LandingPage() {
           />
         ))}
 
-        {/* Decorative corner ornaments */}
-        <div className="absolute top-8 left-8 w-16 h-16 border-t border-l border-primary/10 rounded-tl-lg" />
-        <div className="absolute top-8 right-8 w-16 h-16 border-t border-r border-primary/10 rounded-tr-lg" />
-        <div className="absolute bottom-8 left-8 w-16 h-16 border-b border-l border-primary/10 rounded-bl-lg" />
-        <div className="absolute bottom-8 right-8 w-16 h-16 border-b border-r border-primary/10 rounded-br-lg" />
+        {/* Decorative corner ornaments — desktop only */}
+        <div className="absolute top-8 left-8 hidden sm:block w-16 h-16 border-t border-l border-primary/10 rounded-tl-lg" />
+        <div className="absolute top-8 right-8 hidden sm:block w-16 h-16 border-t border-r border-primary/10 rounded-tr-lg" />
+        <div className="absolute bottom-8 left-8 hidden sm:block w-16 h-16 border-b border-l border-primary/10 rounded-bl-lg" />
+        <div className="absolute bottom-8 right-8 hidden sm:block w-16 h-16 border-b border-r border-primary/10 rounded-br-lg" />
 
         <div className="relative z-10 min-h-screen max-w-2xl mx-auto w-full flex flex-col">
           <div className="flex-1 flex items-center justify-center text-center">
@@ -117,7 +117,7 @@ export function LandingPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1.2 }}
-                className="mb-10 flex justify-center -translate-x-2"
+                className="mb-10 flex justify-center max-sm:translate-x-0 sm:-translate-x-2"
               >
                 <div className="flex items-center gap-4">
                   <span className="block w-12 h-px bg-gradient-to-r from-transparent to-primary/40" />
@@ -167,7 +167,7 @@ export function LandingPage() {
                 <Button
                   size="lg"
                   onClick={handleCreate}
-                  className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg btn-glow glow-strong"
+                  className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg max-sm:shadow-md max-sm:shadow-primary/10 sm:btn-glow sm:glow-strong"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Create a Memorial
@@ -447,7 +447,7 @@ export function LandingPage() {
               <Button
                 size="lg"
                 onClick={handleCreate}
-                className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg btn-glow glow-strong"
+                className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg max-sm:shadow-md max-sm:shadow-primary/10 sm:btn-glow sm:glow-strong"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Get Started — It&apos;s Free

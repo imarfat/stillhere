@@ -46,10 +46,10 @@ export function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03] max-sm:to-primary/[0.015]" />
       <div className="absolute inset-0 bg-grain" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[120px]" />
-      <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-accent/[0.02] rounded-full blur-[80px]" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] max-sm:w-[240px] max-sm:h-[240px] bg-primary/[0.03] max-sm:bg-primary/[0.012] rounded-full blur-[120px] max-sm:blur-[70px]" />
+      <div className="absolute bottom-0 right-0 w-[300px] h-[300px] max-sm:hidden bg-accent/[0.02] rounded-full blur-[80px]" />
       <AuthFloatingDots />
 
       <motion.div
@@ -105,7 +105,7 @@ export function ForgotPasswordPage() {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full h-11 bg-primary text-primary-foreground hover:opacity-90 rounded-xl text-sm font-medium shadow-md shadow-primary/10 btn-glow"
+                  className="w-full h-11 bg-primary text-primary-foreground hover:opacity-90 rounded-xl text-sm font-medium max-sm:shadow-sm max-sm:shadow-primary/10 sm:shadow-md sm:shadow-primary/10 sm:btn-glow"
                   disabled={loading}
                 >
                   {loading ? (
@@ -142,7 +142,7 @@ export function ForgotPasswordPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 1 }}
-          className="mt-8 flex items-center justify-center gap-3 text-xs text-muted-foreground/40"
+          className="mt-8 hidden sm:flex items-center justify-center gap-3 text-xs text-muted-foreground/40"
         >
           <div className="h-px w-8 bg-gradient-to-r from-transparent to-border" />
           <Flame className="w-3 h-3 text-primary/30 animate-pulse-soft" />
