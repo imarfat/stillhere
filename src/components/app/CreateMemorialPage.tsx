@@ -75,6 +75,10 @@ export function CreateMemorialPage() {
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json()
           coverPhotoUrl = uploadData.url
+        } else {
+          const uploadData = await uploadRes.json().catch(() => ({}))
+          toast.error(uploadData.error || "Cover photo upload failed")
+          return
         }
       }
 
