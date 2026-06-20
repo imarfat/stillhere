@@ -249,12 +249,18 @@ export function MemorialPage({ slug }: { slug: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Skeleton className="h-screen w-full" />
-        <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-48 rounded-xl" />
+      <div className="min-h-screen flex flex-col bg-background">
+        <div className="relative h-[80vh] sm:h-[70vh] overflow-hidden bg-gradient-to-b from-[#141210] via-[#1a1814] to-background">
+          <div className="absolute inset-0 bg-grain opacity-40" />
+          <div className="relative z-10 flex h-full flex-col justify-end max-w-2xl mx-auto w-full px-6 pb-12 sm:pb-16">
+            <Skeleton tone="dark" className="h-3 w-36 mb-3 rounded" />
+            <Skeleton tone="dark" className="h-12 sm:h-14 w-56 sm:w-72 mb-4 rounded-lg" />
+            <Skeleton tone="dark" className="h-5 w-40 rounded" />
+          </div>
+        </div>
+        <div className="max-w-2xl mx-auto w-full px-6 py-8 space-y-6 flex-1">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-48 rounded-2xl" />
         </div>
       </div>
     )
@@ -641,7 +647,7 @@ export function MemorialPage({ slug }: { slug: string }) {
                 <p className="text-muted-foreground">No messages yet. Be the first to leave one.</p>
               </div>
             ) : (
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3">
                 {data.guestbookEntries.map((entry) => (
                   <Card key={entry.id} className="border-border/50 bg-muted/20">
                     <CardContent className="p-4">
@@ -659,7 +665,7 @@ export function MemorialPage({ slug }: { slug: string }) {
             )}
 
             {/* Submission form */}
-            <Collapsible open={guestbookOpen} onOpenChange={setGuestbookOpen}>
+            <Collapsible open={guestbookOpen} onOpenChange={setGuestbookOpen} className="mt-5">
               <CollapsibleTrigger asChild>
                 <Button
                   variant="outline"

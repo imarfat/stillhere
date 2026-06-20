@@ -38,6 +38,7 @@ export function AppShell() {
   useEffect(() => {
     if (!hydrated.current) return
     hasNavigatedOnce.current = true
+    window.scrollTo(0, 0)
   }, [route.page])
 
   useEffect(() => {

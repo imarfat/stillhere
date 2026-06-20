@@ -14,8 +14,9 @@ export const authOptions: NextAuthOptions = {
       authorize: async (credentials) => {
         if (!credentials?.email || !credentials?.password) return null
 
+        const email = credentials.email.toLowerCase()
         const user = await db.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         })
         if (!user) return null
 

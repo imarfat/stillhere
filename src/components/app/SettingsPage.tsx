@@ -220,9 +220,9 @@ export function SettingsPage() {
                   <h2 className="font-serif text-xl font-semibold truncate">
                     {session?.user?.name || "Unnamed User"}
                   </h2>
-                  <p className="text-sm text-muted-foreground truncate flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5" />
-                    {session?.user?.email}
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5 min-w-0">
+                    <Mail className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{session?.user?.email}</span>
                   </p>
                 </div>
                 <Button

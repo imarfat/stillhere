@@ -48,7 +48,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div className="min-h-dvh flex items-center justify-center px-6 py-12 max-sm:py-6 relative overflow-hidden">
       {/* Decorative background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03] max-sm:to-primary/[0.015]" />
       <div className="absolute inset-0 bg-grain" />
@@ -63,8 +63,14 @@ export function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         {/* Brand */}
-        <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl font-bold text-gradient-warm mb-2">StillHere</h1>
+        <div className="text-center mb-8 max-sm:mb-5">
+          <button
+            type="button"
+            onClick={() => navigate({ page: "landing" })}
+            className="font-serif text-3xl font-bold text-gradient-warm mb-2 hover:opacity-90 transition-opacity"
+          >
+            StillHere
+          </button>
           <p className="text-muted-foreground text-sm">Sign in to manage your memorials</p>
         </div>
 

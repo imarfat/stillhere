@@ -1,10 +1,17 @@
 import { cn } from "@/lib/utils"
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+function Skeleton({
+  className,
+  tone = "light",
+  ...props
+}: React.ComponentProps<"div"> & { tone?: "light" | "dark" }) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("bg-accent animate-pulse rounded-md", className)}
+      className={cn(
+        tone === "dark" ? "skeleton-block-dark" : "skeleton-block",
+        className
+      )}
       {...props}
     />
   )

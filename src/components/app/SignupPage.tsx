@@ -71,7 +71,7 @@ export function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-8 relative overflow-hidden">
+    <div className="min-h-dvh flex items-center justify-center px-6 py-8 max-sm:py-6 relative overflow-hidden">
       {/* Decorative background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03] max-sm:to-primary/[0.015]" />
       <div className="absolute inset-0 bg-grain" />
@@ -87,7 +87,13 @@ export function SignupPage() {
       >
         {/* Brand */}
         <div className="text-center mb-6">
-          <h1 className="font-serif text-3xl font-bold text-gradient-warm mb-1">StillHere</h1>
+          <button
+            type="button"
+            onClick={() => navigate({ page: "landing" })}
+            className="font-serif text-3xl font-bold text-gradient-warm mb-1 hover:opacity-90 transition-opacity"
+          >
+            StillHere
+          </button>
           <p className="text-muted-foreground text-sm">Create your account</p>
         </div>
 

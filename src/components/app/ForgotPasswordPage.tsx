@@ -45,7 +45,7 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div className="min-h-dvh flex items-center justify-center px-6 py-12 max-sm:py-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03] max-sm:to-primary/[0.015]" />
       <div className="absolute inset-0 bg-grain" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] max-sm:w-[240px] max-sm:h-[240px] bg-primary/[0.03] max-sm:bg-primary/[0.012] rounded-full blur-[120px] max-sm:blur-[70px]" />
@@ -59,7 +59,13 @@ export function ForgotPasswordPage() {
         className="w-full max-w-md relative z-10"
       >
         <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl font-bold text-gradient-warm mb-2">StillHere</h1>
+          <button
+            type="button"
+            onClick={() => navigate({ page: "landing" })}
+            className="font-serif text-3xl font-bold text-gradient-warm mb-2 hover:opacity-90 transition-opacity"
+          >
+            StillHere
+          </button>
           <p className="text-muted-foreground text-sm">Reset your account password</p>
         </div>
 

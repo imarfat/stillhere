@@ -599,6 +599,43 @@ html:not(.dark) .card-hover:hover {
   animation: shimmer-slide 2s ease-in-out infinite;
 }
 
+/* Skeleton placeholders — warm neutrals, not sage accent blocks */
+.skeleton-block {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: color-mix(in srgb, var(--secondary) 75%, var(--card) 25%);
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent 45%);
+}
+.skeleton-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--primary) 14%, transparent 86%) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-slide 1.8s ease-in-out infinite;
+}
+.skeleton-block-dark {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.skeleton-block-dark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.07) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer-slide 1.8s ease-in-out infinite;
+}
+
 /* Focus ring animation */
 .focus-ring-animated {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;

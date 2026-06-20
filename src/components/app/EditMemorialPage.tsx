@@ -560,29 +560,31 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="plain" size="icon" onClick={back} className="shrink-0">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="font-serif text-lg font-semibold truncate max-w-[200px] sm:max-w-xs">
-                {memorial?.name}
-              </h1>
-              <p className="text-xs text-muted-foreground truncate max-w-[200px] sm:max-w-xs">
-                /memorial/{memorial?.slug}
-              </p>
+        <div className="px-6 py-4">
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <Button variant="plain" size="icon" onClick={back} className="shrink-0">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <div className="min-w-0">
+                <h1 className="font-serif text-lg font-semibold truncate max-w-[200px] sm:max-w-xs">
+                  {memorial?.name}
+                </h1>
+                <p className="text-xs text-muted-foreground truncate max-w-[200px] sm:max-w-xs">
+                  /memorial/{memorial?.slug}
+                </p>
+              </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate({ page: "memorial", slug: memorial?.slug || "" })}
+              className="gap-1.5 shrink-0"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">View</span>
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate({ page: "memorial", slug: memorial?.slug || "" })}
-            className="gap-1.5 shrink-0"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">View</span>
-          </Button>
         </div>
       </header>
 
