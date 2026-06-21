@@ -50,10 +50,10 @@ export function LoginPage() {
   return (
     <div className="min-h-dvh flex items-center justify-center px-6 py-12 max-sm:py-6 relative overflow-hidden">
       {/* Decorative background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.03] max-sm:to-primary/[0.015]" />
+      <div className="absolute inset-0 page-decor-bg bg-gradient-to-b from-background via-background/95 to-primary/[0.03] max-sm:to-primary/[0.015]" />
       <div className="absolute inset-0 bg-grain" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] max-sm:w-[240px] max-sm:h-[240px] bg-primary/[0.03] max-sm:bg-primary/[0.012] rounded-full blur-[120px] max-sm:blur-[70px]" />
-      <div className="absolute bottom-0 right-0 w-[300px] h-[300px] max-sm:hidden bg-accent/[0.02] rounded-full blur-[80px]" />
+      <div className="hero-ambient absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] max-sm:w-[240px] max-sm:h-[240px] bg-primary/[0.03] max-sm:bg-primary/[0.012] rounded-full blur-[120px] max-sm:blur-[70px]" />
+      <div className="hero-ambient absolute bottom-0 right-0 w-[300px] h-[300px] max-sm:hidden bg-accent/[0.02] rounded-full blur-[80px]" />
       <AuthFloatingDots />
 
       <motion.div
@@ -74,7 +74,7 @@ export function LoginPage() {
           <p className="text-muted-foreground text-sm">Sign in to manage your memorials</p>
         </div>
 
-        <Card className="border-border/50 shadow-xl shadow-black/5 backdrop-blur-sm bg-card/80">
+        <Card className="border-border/40 shadow-elevated bg-card dark:border-border/50 dark:shadow-xl dark:shadow-black/5 dark:bg-card/80 dark:backdrop-blur-sm">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="font-serif text-2xl">Welcome back</CardTitle>
             <CardDescription>Enter your credentials to continue.</CardDescription>

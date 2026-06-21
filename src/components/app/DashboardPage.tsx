@@ -21,12 +21,24 @@ import {
   Plus, LogOut, MessageSquare, Image as ImageIcon, Calendar, Flame,
   ArrowRight, Search, Eye, Sparkles, Settings, SortDesc,
 } from "lucide-react"
+import { AuthFloatingDots } from "@/components/app/AuthFloatingDots"
+
+const dashboardContainerClass = "max-w-5xl 2xl:max-w-6xl mx-auto w-full px-6"
 
 const sortOptions = [
   { value: "newest", label: "Newest first" },
   { value: "oldest", label: "Oldest first" },
   { value: "name", label: "By name" },
   { value: "tributes", label: "Most tributes" },
+] as const
+
+const dashboardAccentLines = [
+  "Keeping their memory alive",
+  "A place for love and remembrance",
+  "Held close, always",
+  "Honouring those we love",
+  "Memories worth sharing",
+  "Love that endures",
 ] as const
 
 import {
@@ -106,13 +118,48 @@ export function DashboardPage() {
     return ""
   }
 
-  const totalTributes = memorials.reduce((sum, m) => sum + m._count.tributes, 0)
-  const totalPhotos = memorials.reduce((sum, m) => sum + m._count.photos, 0)
+  const renderMemorialStats = (memorial: DashboardMemorial) => {
+    const items = [
+      { key: "photos", icon: ImageIcon, count: memorial._count.photos, iconClass: "" },
+      { key: "tributes", icon: Flame, count: memorial._count.tributes, iconClass: "text-candle" },
+      { key: "messages", icon: MessageSquare, count: memorial._count.guestbookEntries, iconClass: "" },
+    ]
+
+    return (
+      <div className="flex items-center gap-1 flex-wrap">
+        {items.map(({ key, icon: Icon, count, iconClass }) => (
+          <Badge
+            key={key}
+            variant="secondary"
+            className="text-[11px] gap-1 bg-muted/60"
+          >
+            <Icon className={`w-2.5 h-2.5 ${iconClass}`} />
+            {count}
+          </Badge>
+        ))}
+      </div>
+    )
+  }
+
+  const dashboardAccentLine = useMemo(() => {
+    const index = new Date().getDate() % dashboardAccentLines.length
+    return dashboardAccentLines[index]
+  }, [])
+
+  const memorialGridClass =
+    "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4"
+
+  const memorialCoverClass = useMemo(() => {
+    const count = filteredMemorials.length
+    if (count === 1) return "h-44 sm:h-48 2xl:h-56"
+    if (count === 2) return "h-40 sm:h-44 2xl:h-48"
+    return "h-40"
+  }, [filteredMemorials.length])
 
   if (loading) {
     return (
-      <div className="min-h-screen px-6 py-8">
-        <div className="max-w-5xl mx-auto">
+      <div className="min-h-screen py-8 2xl:bg-muted/20">
+        <div className={dashboardContainerClass}>
           <div className="flex items-center justify-between mb-8">
             <div>
               <Skeleton className="h-8 w-40 mb-2" />
@@ -131,10 +178,16 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-hidden 2xl:bg-muted/20">
+      <div className="pointer-events-none absolute inset-0 hidden 2xl:block" aria-hidden>
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-primary/[0.03]" />
+        <div className="absolute inset-0 bg-grain opacity-[0.18]" />
+        <AuthFloatingDots />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-30 relative bg-card/92 backdrop-blur-xl border-b border-border dark:bg-background/80 dark:border-border/40">
+        <div className={`${dashboardContainerClass} py-4 flex items-center justify-between`}>
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <button
               onClick={() => navigate({ page: "landing" })}
@@ -170,35 +223,8 @@ export function DashboardPage() {
         </div>
       </header>
 
-      <main className="flex-1 px-6 py-8">
-        <div className="max-w-5xl mx-auto">
-          {/* Stats bar */}
-          {memorials.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-4 sm:gap-6 mb-8 p-4 bg-card/60 rounded-xl border border-border/30"
-            >
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span className="font-medium">{memorials.length}</span>
-                <span className="text-muted-foreground hidden sm:inline">memorials</span>
-              </div>
-              <div className="h-4 w-px bg-border/50" />
-              <div className="flex items-center gap-2 text-sm">
-                <ImageIcon className="w-4 h-4 text-primary/70" />
-                <span className="font-medium">{totalPhotos}</span>
-                <span className="text-muted-foreground hidden sm:inline">photos</span>
-              </div>
-              <div className="h-4 w-px bg-border/50" />
-              <div className="flex items-center gap-2 text-sm">
-                <Flame className="w-4 h-4 text-candle/70" />
-                <span className="font-medium">{totalTributes}</span>
-                <span className="text-muted-foreground hidden sm:inline">tributes</span>
-              </div>
-            </motion.div>
-          )}
-
+      <main className="relative z-10 flex-1 py-8 flex flex-col min-h-[calc(100dvh-4.5rem)]">
+        <div className={`${dashboardContainerClass} flex-1 flex flex-col min-h-full`}>
           {/* Title + Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
@@ -272,16 +298,16 @@ export function DashboardPage() {
               </p>
               <Button
                 onClick={() => navigate({ page: "create-memorial" })}
-                className="hidden sm:inline-flex bg-primary text-primary-foreground hover:opacity-90 rounded-full px-8 h-11 btn-glow"
+                className="inline-flex bg-primary text-primary-foreground hover:opacity-90 rounded-full px-8 h-11 btn-glow"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Create your first memorial
               </Button>
             </motion.div>
           ) : (
-            <>
+            <div className="flex-1 flex flex-col">
               {/* Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className={memorialGridClass}>
                 <AnimatePresence mode="popLayout">
                   {filteredMemorials.map((memorial, i) => (
                     <motion.div
@@ -293,16 +319,16 @@ export function DashboardPage() {
                       layout
                     >
                       <Card
-                        className="border-border/40 hover:border-primary/25 cursor-pointer transition-all duration-400 overflow-hidden group card-hover bg-card py-0 gap-0"
+                        className="memorial-card border-border/40 cursor-pointer overflow-hidden group bg-card py-0 gap-0 shadow-soft flex flex-col"
                         onClick={() => navigate({ page: "edit-memorial", memorialId: memorial.id })}
                       >
-                        {/* Cover */}
-                        <div className="relative h-36 sm:h-40 bg-muted overflow-hidden">
+                        {/* Cover — full frame, no overlays eating the photo */}
+                        <div className={`relative shrink-0 bg-muted overflow-hidden ${memorialCoverClass}`}>
                           {memorial.coverPhotoUrl ? (
                             <img
                               src={memorial.coverPhotoUrl}
                               alt={memorial.name}
-                              className="w-full h-full object-cover origin-bottom group-hover:scale-105 transition-transform duration-700"
+                              className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/[0.04] via-transparent to-accent/[0.03]">
@@ -311,58 +337,38 @@ export function DashboardPage() {
                               </span>
                             </div>
                           )}
-                          <div className="absolute inset-0 -bottom-px bg-gradient-to-t from-card via-card/20 to-transparent" />
 
-                          {/* View public page button */}
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               navigate({ page: "memorial", slug: memorial.slug })
                             }}
-                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-background/90"
+                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/75 backdrop-blur-sm flex items-center justify-center opacity-90 hover:opacity-100 hover:bg-background/90 transition-all"
                             aria-label="View public page"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
                         </div>
 
-                        <CardContent className="relative z-10 -mt-px bg-card p-4">
-                          <h3 className="font-serif text-lg font-semibold mb-1 truncate group-hover:text-primary transition-colors">
+                        <CardContent className="relative bg-card px-3.5 py-2.5 shrink-0">
+                          <h3 className="font-serif text-lg font-semibold leading-tight truncate group-hover:text-primary transition-colors">
                             {memorial.name}
                           </h3>
                           {getDateRange(memorial.dob, memorial.dod) && (
-                            <p className="text-xs text-muted-foreground/70 mb-1.5 font-medium">
+                            <p className="text-xs text-muted-foreground/70 mt-0.5 font-medium">
                               {getDateRange(memorial.dob, memorial.dod)}
                             </p>
                           )}
+                          <div className="mt-1.5">{renderMemorialStats(memorial)}</div>
                           {memorial.tagline && (
-                            <p className="text-sm text-muted-foreground/60 mb-3 line-clamp-2 leading-relaxed">
+                            <p className="text-sm text-muted-foreground/60 mt-1.5 line-clamp-1 leading-snug">
                               {memorial.tagline}
                             </p>
                           )}
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            {memorial._count.photos > 0 && (
-                              <Badge variant="secondary" className="text-[11px] gap-1 bg-muted/60">
-                                <ImageIcon className="w-2.5 h-2.5" />
-                                {memorial._count.photos}
-                              </Badge>
-                            )}
-                            {memorial._count.tributes > 0 && (
-                              <Badge variant="secondary" className="text-[11px] gap-1 bg-muted/60">
-                                <Flame className="w-2.5 h-2.5 text-candle" />
-                                {memorial._count.tributes}
-                              </Badge>
-                            )}
-                            {memorial._count.guestbookEntries > 0 && (
-                              <Badge variant="secondary" className="text-[11px] gap-1 bg-muted/60">
-                                <MessageSquare className="w-2.5 h-2.5" />
-                                {memorial._count.guestbookEntries}
-                              </Badge>
-                            )}
-                          </div>
 
-                          <div className="flex items-center text-primary text-xs mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-medium">
-                            Manage <ArrowRight className="w-3 h-3 ml-1" />
+                          <div className="flex items-center justify-between gap-3 mt-2 pt-2 border-t border-border/35">
+                            <span className="text-xs text-muted-foreground">Manage memorial</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-primary shrink-0 group-hover:translate-x-0.5 transition-transform" />
                           </div>
                         </CardContent>
                       </Card>
@@ -377,21 +383,35 @@ export function DashboardPage() {
                   No memorials match &ldquo;{searchQuery}&rdquo;
                 </div>
               )}
-            </>
+
+              <motion.footer
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="mt-auto w-full pt-10 sm:pt-12"
+              >
+                <div className="flex w-full items-center gap-3">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/20" />
+                  <Sparkles className="w-3 h-3 shrink-0 text-primary/45 animate-pulse-soft" />
+                  <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/20" />
+                </div>
+                <p className="font-serif text-sm italic text-muted-foreground/80 text-center px-2 mt-4">
+                  {dashboardAccentLine}
+                </p>
+                <div className="sm:hidden mt-5 pt-5 pb-2 border-t border-border/30">
+                  <Button
+                    onClick={() => navigate({ page: "create-memorial" })}
+                    className="w-full rounded-xl h-11 bg-primary text-primary-foreground hover:opacity-90 shadow-md shadow-primary/20 btn-glow"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Memorial
+                  </Button>
+                </div>
+              </motion.footer>
+            </div>
           )}
         </div>
       </main>
-
-      {/* Mobile FAB */}
-      <div className="fixed bottom-6 right-6 sm:hidden z-40">
-        <Button
-          onClick={() => navigate({ page: "create-memorial" })}
-          size="lg"
-          className="rounded-full w-14 h-14 bg-primary text-primary-foreground shadow-xl shadow-primary/30 animate-glow-pulse"
-        >
-          <Plus className="w-6 h-6" />
-        </Button>
-      </div>
     </div>
   )
 }

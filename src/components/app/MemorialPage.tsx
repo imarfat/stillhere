@@ -8,31 +8,84 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { toast } from "sonner"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useInView } from "framer-motion"
 import {
   Flame, Flower2, ChevronDown, ChevronLeft, ChevronRight,
   MessageSquare, Share2, Copy, Download, X,
   Heart, Instagram, Facebook, CheckCircle2,
+  BookOpen, Clock, ImageIcon, Music, Video,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { formatDate, formatRelativeTime } from "@/lib/slug"
 import { SongEmbed, SongAudioPlayer } from "@/components/app/SongEmbed"
 import { LifeTimeline } from "@/components/app/LifeTimeline"
-import { MemorialHeroDots, MemorialContentDots } from "@/components/app/MemorialHeroDots"
+import { MemorialGutterDots } from "@/components/app/MemorialHeroDots"
 
 const loaderExit = { opacity: 0, transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } }
 
+const memorialSectionTransition = { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] as const }
+const tributesRevealDelayMs = 650 + 650
+
+function MemorialAnimatedSection({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, amount: 0.12 })
+  const [tributesReady, setTributesReady] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTributesReady(true), tributesRevealDelayMs)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const visible = tributesReady && isInView
+
+  return (
+    <motion.section
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      transition={memorialSectionTransition}
+      className={className}
+    >
+      {children}
+    </motion.section>
+  )
+}
+
+function MemorialSectionTitle({
+  icon: Icon,
+  children,
+}: {
+  icon: LucideIcon
+  children: React.ReactNode
+}) {
+  return (
+    <h2 className="font-serif text-2xl font-bold mb-5 flex items-center gap-2.5">
+      <Icon className="w-5 h-5 shrink-0 text-primary/50" strokeWidth={1.75} />
+      {children}
+    </h2>
+  )
+}
+
 function MemorialLoadingScreen() {
   return (
-    <div className="relative h-full w-full flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#141210] via-[#1a1814] to-[#141210]">
+    <div className="relative h-full w-full flex items-center justify-center overflow-hidden memorial-hero-fallback-bg memorial-loading-screen">
       <div className="absolute inset-0 bg-grain opacity-40" />
       <div className="relative z-10 flex flex-col items-center gap-4">
-        <Heart className="w-4 h-4 text-primary/35 animate-pulse-soft" strokeWidth={1.75} />
+        <Heart
+          className="memorial-loading-icon w-4 h-4 text-primary/70 animate-heartbeat fill-primary/15"
+          strokeWidth={1.75}
+        />
         <div
-          className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary/70 animate-spin"
+          className="memorial-loading-spinner w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary/70 animate-spin"
           role="status"
           aria-label="Loading memorial"
         />
@@ -268,7 +321,7 @@ export function MemorialPage({ slug }: { slug: string }) {
   const activePhoto = photos[currentPhoto]
 
   return (
-    <div className="min-h-dvh bg-[#141210]">
+    <div className="min-h-dvh bg-background">
       {!loading && (notFound || !data) && (
         <motion.div
           key="memorial-not-found"
@@ -301,8 +354,9 @@ export function MemorialPage({ slug }: { slug: string }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
-          className="min-h-dvh flex flex-col"
+          className="relative min-h-dvh flex flex-col md:bg-muted/25"
         >
+      <MemorialGutterDots />
       {/* Sticky Nav */}
       <AnimatePresence>
         {showStickyNav && (
@@ -310,9 +364,9 @@ export function MemorialPage({ slug }: { slug: string }) {
             initial={{ y: -60, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -60, opacity: 0 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border/50"
+            className="fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none"
           >
-            <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div className="memorial-page-frame w-full px-6 py-3 flex items-center justify-between bg-background/90 backdrop-blur-lg border-b border-border/50 md:border-x md:border-border/40 pointer-events-auto">
               <div className="memorial-sticky-heading min-w-0">
                 <p className="memorial-sticky-epigraph">In loving memory of</p>
                 <p className="font-serif text-lg font-semibold truncate">{data.name}</p>
@@ -326,84 +380,86 @@ export function MemorialPage({ slug }: { slug: string }) {
         )}
       </AnimatePresence>
 
+      <div className="memorial-page-frame relative z-10 mx-auto w-full flex-1 flex flex-col bg-background md:border-x md:border-border/40 md:shadow-[0_0_60px_rgba(0,0,0,0.06)]">
       {/* Hero */}
-      <section ref={heroRef} className="relative">
-        <div className="relative h-[80vh] sm:h-[70vh] flex items-end overflow-hidden">
-          {/* Cover Photo */}
-          {data.coverPhotoUrl ? (
-            <>
-              <motion.img
-                src={data.coverPhotoUrl}
-                alt=""
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="absolute inset-0 w-full h-full object-cover"
+      <section ref={heroRef} className="memorial-hero relative">
+        <div className="memorial-hero-inner">
+          <div className="memorial-hero-photo">
+            {data.coverPhotoUrl ? (
+              <>
+                <motion.img
+                  src={data.coverPhotoUrl}
+                  alt=""
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 hero-overlay" />
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.9, ease: "easeOut" }}
+                className="absolute inset-0 memorial-hero-fallback-bg"
               />
-              <div className="absolute inset-0 hero-overlay" />
-            </>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.9, ease: "easeOut" }}
-              className="absolute inset-0 bg-gradient-to-b from-[#141210] via-[#1a1814] to-[#141210]"
-            />
-          )}
-          <div className="absolute inset-0 bg-grain" />
-          <MemorialHeroDots />
+            )}
+            <div className="absolute inset-0 bg-grain" />
+          </div>
 
-          {/* Hero Content */}
-          <div className="relative z-10 w-full max-w-2xl mx-auto px-6 pb-12 sm:pb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.85, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="memorial-hero-copy"
-            >
-              <p className="memorial-hero-epigraph">In loving memory of</p>
-              <h1 className="memorial-hero-name text-4xl sm:text-5xl md:text-6xl font-bold text-gradient-warm">
-                {data.name}
-              </h1>
-              {(getDateRange() || data.tagline || data.restingPlace) && (
-                <div className="memorial-hero-meta">
+          <div className="memorial-hero-content w-full">
+            <div className="px-6">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.85, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="memorial-hero-copy"
+              >
+                <p className="memorial-hero-epigraph">In loving memory of</p>
+                <div className="memorial-hero-headline">
+                  <h1 className="memorial-hero-name text-4xl font-bold">
+                    {data.name}
+                  </h1>
                   {getDateRange() && (
                     <p className="memorial-hero-dates">{getDateRange()}</p>
                   )}
-                  {data.tagline && (
-                    <p className="memorial-hero-tagline">&ldquo;{data.tagline}&rdquo;</p>
-                  )}
-                  {data.restingPlace && (
-                    <p className="memorial-hero-resting">
-                      <span className="memorial-hero-resting-label">Resting at</span>
-                      <span className="memorial-hero-resting-sep" aria-hidden="true">
-                        ·
-                      </span>
-                      <span className="memorial-hero-resting-place">{data.restingPlace}</span>
-                    </p>
-                  )}
                 </div>
-              )}
-            </motion.div>
+                {(data.tagline || data.restingPlace) && (
+                  <div className="memorial-hero-meta">
+                    {data.tagline && (
+                      <p className="memorial-hero-tagline">&ldquo;{data.tagline}&rdquo;</p>
+                    )}
+                    {data.restingPlace && (
+                      <p className="memorial-hero-resting">
+                        <span className="memorial-hero-resting-label">Resting at</span>
+                        <span className="memorial-hero-resting-sep" aria-hidden="true">
+                          ·
+                        </span>
+                        <span className="memorial-hero-resting-place">{data.restingPlace}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Main Content + Footer */}
-      <div className="relative flex-1 flex flex-col bg-background">
-        <MemorialContentDots />
-
+      <div className="relative flex-1 flex flex-col">
         <main className="relative z-10 flex-1">
-        <div className="max-w-2xl mx-auto px-6">
+        <div className="px-6">
 
           {/* Tributes Bar */}
           <motion.section
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, delay: 0.65, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="py-8"
+            className="memorial-tributes-section"
           >
-            <div className="bg-card border border-border/50 rounded-2xl p-5 sm:p-6 shadow-lg shadow-primary/5">
+            <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-lg shadow-primary/5">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <p className="text-xs text-muted-foreground">Leave a tribute</p>
                 <div className="flex gap-2">
@@ -508,46 +564,31 @@ export function MemorialPage({ slug }: { slug: string }) {
 
           {/* Biography */}
           {data.bio && (
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="py-8"
-            >
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-6">Their Story</h2>
+            <MemorialAnimatedSection className="py-6">
+              <MemorialSectionTitle icon={BookOpen}>Their Story</MemorialSectionTitle>
               <div
-                className="prose prose-sm sm:prose max-w-none text-muted-foreground leading-relaxed font-sans
+                className="prose prose-sm max-w-none text-muted-foreground leading-relaxed font-sans
                   [&_h2]:font-serif [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-6 [&_h2]:mb-3
                   [&_h3]:font-serif [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-4 [&_h3]:mb-2
                   [&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground
                   [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1"
                 dangerouslySetInnerHTML={{ __html: data.bio }}
               />
-            </motion.section>
+            </MemorialAnimatedSection>
           )}
 
           {/* Timeline */}
           {data.timelineEvents && data.timelineEvents.length > 0 && (
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="py-8"
-            >
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-6">Life Timeline</h2>
+            <MemorialAnimatedSection className="py-6">
+              <MemorialSectionTitle icon={Clock}>Life Timeline</MemorialSectionTitle>
               <LifeTimeline events={data.timelineEvents} />
-            </motion.section>
+            </MemorialAnimatedSection>
           )}
 
           {/* Photo Gallery */}
           {photos.length > 0 && activePhoto && (
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="py-8"
-            >
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-6">Gallery</h2>
+            <MemorialAnimatedSection className="py-6">
+              <MemorialSectionTitle icon={ImageIcon}>Gallery</MemorialSectionTitle>
               <div
                 ref={carouselRef}
                 className="relative rounded-2xl overflow-hidden bg-muted touch-pan-y"
@@ -559,7 +600,7 @@ export function MemorialPage({ slug }: { slug: string }) {
                     key={currentPhoto}
                     src={activePhoto.url}
                     alt=""
-                    className="w-full aspect-[4/3] sm:aspect-video object-cover cursor-pointer"
+                    className="w-full aspect-[4/3] object-cover cursor-pointer"
                     onClick={() => setLightboxOpen(true)}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -606,18 +647,13 @@ export function MemorialPage({ slug }: { slug: string }) {
                   {currentPhoto + 1} / {photos.length}
                 </div>
               </div>
-            </motion.section>
+            </MemorialAnimatedSection>
           )}
 
           {/* Favourite Song */}
           {(data.songEmbedUrl || data.songUrl) && (
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="py-8"
-            >
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-6">Favourite Song</h2>
+            <MemorialAnimatedSection className="py-6">
+              <MemorialSectionTitle icon={Music}>Favourite Song</MemorialSectionTitle>
               {data.songEmbedUrl ? (
                 <SongEmbed embedUrl={data.songEmbedUrl} />
               ) : (
@@ -627,19 +663,14 @@ export function MemorialPage({ slug }: { slug: string }) {
                   artist={data.songArtist}
                 />
               )}
-            </motion.section>
+            </MemorialAnimatedSection>
           )}
 
           {/* Video Tributes */}
           {data.videos && data.videos.length > 0 && (
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="py-8"
-            >
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-6">Video Tributes</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <MemorialAnimatedSection className="py-6">
+              <MemorialSectionTitle icon={Video}>Video Tributes</MemorialSectionTitle>
+              <div className="grid grid-cols-1 gap-4">
                 {data.videos.map((video) => (
                   <div key={video.id} className="rounded-2xl overflow-hidden bg-card border border-border/50">
                     <div className="aspect-video">
@@ -651,17 +682,12 @@ export function MemorialPage({ slug }: { slug: string }) {
                   </div>
                 ))}
               </div>
-            </motion.section>
+            </MemorialAnimatedSection>
           )}
 
           {/* Guestbook */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="py-8"
-          >
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-6">Guestbook</h2>
+          <MemorialAnimatedSection className="py-6">
+            <MemorialSectionTitle icon={MessageSquare}>Guestbook</MemorialSectionTitle>
 
             {/* Messages */}
             {(!data.guestbookEntries || data.guestbookEntries.length === 0) ? (
@@ -747,16 +773,11 @@ export function MemorialPage({ slug }: { slug: string }) {
                 )}
               </CollapsibleContent>
             </Collapsible>
-          </motion.section>
+          </MemorialAnimatedSection>
 
           {/* Share */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="py-8"
-          >
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-6">Share</h2>
+          <MemorialAnimatedSection className="py-6">
+            <MemorialSectionTitle icon={Share2}>Share</MemorialSectionTitle>
             <div className="flex flex-wrap gap-3">
               <Button variant="outline" onClick={handleShareWhatsApp} className="gap-2 rounded-xl">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -773,15 +794,13 @@ export function MemorialPage({ slug }: { slug: string }) {
                 Copy Link
               </Button>
             </div>
-          </motion.section>
-
-          <Separator className="my-8" />
+          </MemorialAnimatedSection>
         </div>
         </main>
 
       {/* Footer */}
       <footer className="relative z-10 py-8 px-6 border-t border-border/50 mt-auto">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="text-center">
           <button
             type="button"
             onClick={() => router.push("/")}
@@ -794,6 +813,7 @@ export function MemorialPage({ slug }: { slug: string }) {
           </p>
         </div>
       </footer>
+      </div>
       </div>
 
       {/* Lightbox Dialog */}

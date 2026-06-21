@@ -75,14 +75,14 @@ export function LandingPage() {
       {/* ── Hero ── */}
       <section className="hero-section relative min-h-screen px-6 overflow-hidden">
         {/* Background layers */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-primary/[0.06] max-sm:to-primary/[0.03]" />
+        <div className="absolute inset-0 hero-section-bg bg-gradient-to-b from-background via-background/95 to-primary/[0.06] max-sm:to-primary/[0.03]" />
         <HeroLineArt />
         <div className="absolute inset-0 bg-grain" />
 
         {/* Radial ambient glow — toned down on mobile */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] max-sm:w-[260px] max-sm:h-[260px] bg-primary/[0.04] max-sm:bg-primary/[0.015] rounded-full blur-[120px] max-sm:blur-[70px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] max-sm:hidden bg-accent/[0.03] rounded-full blur-[100px]" />
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] max-sm:hidden bg-flower/[0.02] rounded-full blur-[80px]" />
+        <div className="hero-ambient absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] max-sm:w-[260px] max-sm:h-[260px] bg-primary/[0.04] max-sm:bg-primary/[0.015] rounded-full blur-[120px] max-sm:blur-[70px]" />
+        <div className="hero-ambient absolute bottom-0 left-0 w-[400px] h-[400px] max-sm:hidden bg-accent/[0.03] rounded-full blur-[100px]" />
+        <div className="hero-ambient absolute top-0 right-0 w-[300px] h-[300px] max-sm:hidden bg-flower/[0.02] rounded-full blur-[80px]" />
 
         {/* Decorative floating elements */}
         <div className="absolute top-[20%] left-[10%] w-1 h-1 rounded-full bg-primary/30 animate-float" />
@@ -213,7 +213,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section id="features" className="py-20 sm:py-28 px-6 relative">
+      <section id="features" className="section-surface py-20 sm:py-28 px-6 relative">
         <div className="max-w-5xl mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -239,7 +239,7 @@ export function LandingPage() {
                 description: "Leave candles, flowers, and heartfelt messages that family and friends can see and add to.",
                 color: "text-candle",
                 bg: "bg-candle/[0.08]",
-                border: "border-candle/10",
+                darkBorder: "dark:border-candle/15",
               },
               {
                 icon: Image,
@@ -247,15 +247,15 @@ export function LandingPage() {
                 description: "Upload photos, add life events to a timeline, embed videos, and write their story in a beautiful biography.",
                 color: "text-primary",
                 bg: "bg-primary/[0.08]",
-                border: "border-primary/10",
+                darkBorder: "dark:border-primary/15",
               },
               {
                 icon: Share2,
                 title: "Easy Sharing",
                 description: "Generate QR codes for printed materials. Share instantly via WhatsApp, Facebook, or a simple link.",
-                color: "text-accent",
-                bg: "bg-accent/[0.08]",
-                border: "border-accent/10",
+                color: "text-sage",
+                bg: "bg-sage/10",
+                darkBorder: "dark:border-sage/20",
               },
             ].map((feature, i) => (
               <motion.div
@@ -266,7 +266,7 @@ export function LandingPage() {
                 variants={fadeUp}
                 custom={i + 2}
               >
-                <div className={`bg-card border ${feature.border} rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group select-none hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_8px_32px_rgba(196,148,74,0.12)] dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)]`}>
+                <div className={`bg-card border border-border shadow-soft ${feature.darkBorder} rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group select-none hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none`}>
                   <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${feature.bg} mb-5 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className={`w-6 h-6 ${feature.color}`} />
                   </div>
@@ -280,9 +280,9 @@ export function LandingPage() {
       </section>
 
       {/* ── How it Works ── */}
-      <section className="py-20 sm:py-28 px-6 bg-muted/35 relative overflow-hidden">
+      <section className="section-surface-alt py-20 sm:py-28 px-6 relative overflow-hidden">
         {/* Subtle decorative arc */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
+        <div className="section-ambient absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
 
         <div className="max-w-5xl mx-auto relative">
           <motion.div
@@ -397,7 +397,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Feature Tags ── */}
-      <section className="py-20 sm:py-28 px-6">
+      <section className="section-surface py-20 sm:py-28 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial="hidden"
@@ -435,7 +435,7 @@ export function LandingPage() {
               ].map((tag) => (
                 <div
                   key={tag.label}
-                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-full bg-card border border-border/50 text-xs sm:text-sm hover:border-primary/30 hover:shadow-soft transition-all duration-300 cursor-default"
+                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-full bg-card border border-border text-xs sm:text-sm hover:border-primary/30 hover:shadow-soft transition-all duration-300 cursor-default"
                 >
                   <tag.icon className="w-4 h-4 text-primary" />
                   <span className="font-medium">{tag.label}</span>
@@ -459,9 +459,9 @@ export function LandingPage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="py-20 sm:py-28 px-6 bg-muted/35 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-flower/[0.02] rounded-full blur-[80px]" />
+      <section className="section-surface-alt py-20 sm:py-28 px-6 relative overflow-hidden">
+        <div className="section-ambient absolute top-0 right-0 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
+        <div className="section-ambient absolute bottom-0 left-0 w-[300px] h-[300px] bg-flower/[0.02] rounded-full blur-[80px]" />
 
         <div className="max-w-5xl mx-auto relative">
           <motion.div
@@ -516,7 +516,7 @@ export function LandingPage() {
                 variants={fadeUp}
                 custom={i + 2}
               >
-                <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group relative hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_8px_32px_rgba(196,148,74,0.12)] dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] select-none">
+                <div className="bg-card border border-border shadow-soft rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group relative hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none select-none">
                   <Quote className="absolute top-6 right-6 w-8 h-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
                   <div className="flex items-center gap-1 mb-4">
                     {[1, 2, 3, 4, 5].map((s) => (
@@ -543,7 +543,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="py-10 px-6 border-t border-border/30 mt-auto relative">
+      <footer className="section-surface py-10 px-6 border-t border-border mt-auto relative">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-serif text-xl font-semibold text-gradient-warm">StillHere</span>
           <p className="text-sm text-muted-foreground/70">

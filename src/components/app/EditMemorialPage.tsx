@@ -18,26 +18,63 @@ import {
   ArrowLeft, ExternalLink, Copy, Download, Check, Loader2, Plus, Trash2,
   ChevronUp, ChevronDown, Upload, X, Image as ImageIcon, Music,
   Video, MessageSquare, CheckCircle2, Clock, Flame, Flower2, ShieldAlert,
+  Calendar, MapPin, PenLine, Quote, BookOpen, Link2, Type, User, Share2, AlignLeft,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { formatDate } from "@/lib/slug"
-import { SongEmbed } from "@/components/app/SongEmbed"
+import { SongEmbed, SongAudioPlayer } from "@/components/app/SongEmbed"
 import { CoverHeroPreview } from "@/components/app/CoverHeroPreview"
 import { invalidateDashboardMemorials } from "@/lib/dashboard-cache"
 import { invalidateSettingsStats } from "@/lib/settings-cache"
 import { cn } from "@/lib/utils"
 
+function FieldLabel({
+  icon: Icon,
+  children,
+  className,
+  size = "sm",
+}: {
+  icon: LucideIcon
+  children: React.ReactNode
+  className?: string
+  size?: "sm" | "md"
+}) {
+  return (
+    <Label
+      className={cn(
+        "flex items-center gap-1.5 font-medium",
+        size === "md" ? "text-base gap-2" : "text-sm",
+        className
+      )}
+    >
+      <Icon
+        className={cn(
+          "shrink-0 text-primary/50",
+          size === "md" ? "w-4 h-4 text-primary/60" : "w-3.5 h-3.5"
+        )}
+      />
+      {children}
+    </Label>
+  )
+}
+
 function AccordionSectionLabel({
   title,
   meta,
   metaClassName,
+  icon: Icon,
 }: {
   title: string
   meta?: string
   metaClassName?: string
+  icon?: LucideIcon
 }) {
   return (
     <span className="flex flex-1 items-center justify-between gap-3 min-w-0 pr-1">
-      <span data-accordion-title className="truncate">{title}</span>
+      <span data-accordion-title className="flex items-center gap-2 truncate min-w-0">
+        {Icon && <Icon className="w-4 h-4 shrink-0 text-primary/50" />}
+        <span className="truncate">{title}</span>
+      </span>
       {meta && (
         <span className={cn("text-xs font-sans font-normal text-muted-foreground shrink-0", metaClassName)}>
           {meta}
@@ -598,13 +635,15 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
             {/* Share & QR */}
             <AccordionItem value="share">
               <AccordionTrigger className="font-serif text-lg">
-                <span data-accordion-title>Share & QR Code</span>
+                <AccordionSectionLabel title="Share & QR Code" icon={Share2} />
               </AccordionTrigger>
               <AccordionContent>
                 <Card className="border-border/50">
                   <CardContent className="p-4 space-y-4">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Public URL</Label>
+                      <FieldLabel icon={Link2} className="text-xs text-muted-foreground font-normal">
+                        Public URL
+                      </FieldLabel>
                       <div className="flex items-center gap-2 mt-1">
                         <code className="flex-1 text-sm bg-muted px-3 py-2 rounded-lg truncate">
                           /memorial/{memorial?.slug}
@@ -631,15 +670,15 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
             {/* Details */}
             <AccordionItem value="details">
               <AccordionTrigger className="font-serif text-lg">
-                <span data-accordion-title>Details</span>
+                <AccordionSectionLabel title="Details" icon={PenLine} />
               </AccordionTrigger>
               <AccordionContent>
                 <form onSubmit={handleSaveDetails} className="space-y-4">
                   {/* Cover */}
-                  <Card className="border-border/50 overflow-hidden py-0 gap-0">
-                    <CardContent className="p-0">
+                  <Card className="border-border/50 overflow-hidden gradient-border py-0 gap-0">
+                    <CardContent className="p-0 relative z-10">
                       {coverPreview ? (
-                        <div className="p-4 space-y-4">
+                        <div className="p-4 sm:p-5 space-y-4">
                           <CoverHeroPreview
                             coverUrl={coverPreview}
                             name={form.name}
@@ -695,29 +734,29 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
                   </Card>
 
                   <div className="space-y-2">
-                    <Label>Full Name</Label>
+                    <FieldLabel icon={PenLine} size="md">Full Name</FieldLabel>
                     <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="h-11" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label>Date of Birth</Label>
+                      <FieldLabel icon={Calendar}>Date of Birth</FieldLabel>
                       <Input type="date" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })} className="h-11" />
                     </div>
                     <div className="space-y-2">
-                      <Label>Date of Passing</Label>
+                      <FieldLabel icon={Calendar}>Date of Passing</FieldLabel>
                       <Input type="date" value={form.dod} onChange={(e) => setForm({ ...form, dod: e.target.value })} className="h-11" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Tagline</Label>
+                    <FieldLabel icon={Quote}>Tagline</FieldLabel>
                     <Input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} className="h-11" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Resting Place</Label>
+                    <FieldLabel icon={MapPin}>Resting Place</FieldLabel>
                     <Input value={form.restingPlace} onChange={(e) => setForm({ ...form, restingPlace: e.target.value })} className="h-11" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Life Story</Label>
+                    <FieldLabel icon={BookOpen}>Life Story</FieldLabel>
                     <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={5} className="resize-y" />
                   </div>
                   <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground hover:opacity-90 rounded-lg">
@@ -733,6 +772,7 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
               <AccordionTrigger className="font-serif text-lg">
                 <AccordionSectionLabel
                   title="Life Timeline"
+                  icon={Clock}
                   meta={
                     timelineEvents.length > 0
                       ? `${timelineEvents.length} ${timelineEvents.length === 1 ? "event" : "events"}`
@@ -746,16 +786,16 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
                     <CardContent className="p-4 space-y-3">
                       <div className="grid grid-cols-1 sm:grid-cols-[9.75rem_1fr] gap-3">
                         <div className="space-y-1 min-w-0">
-                          <Label className="text-xs">Date (optional)</Label>
+                          <FieldLabel icon={Calendar} className="text-xs font-normal">Date (optional)</FieldLabel>
                           <Input type="date" value={newEvent.eventDate} onChange={(e) => setNewEvent({ ...newEvent, eventDate: e.target.value })} className="h-10 text-sm" />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">Title *</Label>
+                          <FieldLabel icon={Type} className="text-xs font-normal">Title *</FieldLabel>
                           <Input value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} placeholder="Event title" className="h-10 text-sm" />
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Description</Label>
+                        <FieldLabel icon={AlignLeft} className="text-xs font-normal">Description</FieldLabel>
                         <Textarea value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} rows={2} className="text-sm" />
                       </div>
                       <Button size="sm" onClick={handleAddTimelineEvent} disabled={addingTimeline || !newEvent.title.trim()} className="bg-primary text-primary-foreground">
@@ -797,6 +837,7 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
               <AccordionTrigger className="font-serif text-lg">
                 <AccordionSectionLabel
                   title="Photo Gallery"
+                  icon={ImageIcon}
                   meta={
                     photos.length > 0
                       ? `${photos.length} ${photos.length === 1 ? "photo" : "photos"}`
@@ -848,6 +889,7 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
               <AccordionTrigger className="font-serif text-lg">
                 <AccordionSectionLabel
                   title="Favourite Song"
+                  icon={Music}
                   meta={
                     memorial?.songEmbedUrl || memorial?.songUrl
                       ? "Added"
@@ -857,63 +899,71 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4">
-                  {memorial?.songEmbedUrl && (
-                    <div className="space-y-2">
-                      <SongEmbed embedUrl={memorial.songEmbedUrl} />
+                  {memorial?.songEmbedUrl || memorial?.songUrl ? (
+                    <div className="space-y-3">
+                      {memorial.songEmbedUrl ? (
+                        <SongEmbed embedUrl={memorial.songEmbedUrl} />
+                      ) : (
+                        <SongAudioPlayer
+                          url={memorial.songUrl!}
+                          title={memorial.songTitle}
+                          artist={memorial.songArtist}
+                        />
+                      )}
                       <Button variant="outline" size="sm" onClick={handleRemoveSong} className="text-destructive">
                         <Trash2 className="w-3.5 h-3.5 mr-1.5" />
                         Remove Song
                       </Button>
                     </div>
-                  )}
-
-                  <Separator />
-
-                  <div className="flex gap-2 mb-3">
-                    <Button variant={songMode === "embed" ? "default" : "outline"} size="sm" onClick={() => setSongMode("embed")}>
-                      <Music className="w-3.5 h-3.5 mr-1.5" />
-                      Link
-                    </Button>
-                    <Button variant={songMode === "upload" ? "default" : "outline"} size="sm" onClick={() => setSongMode("upload")}>
-                      <Upload className="w-3.5 h-3.5 mr-1.5" />
-                      Upload
-                    </Button>
-                  </div>
-
-                  {songMode === "embed" ? (
-                    <div className="space-y-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Spotify or Apple Music Link</Label>
-                        <Input value={songLink} onChange={(e) => setSongLink(e.target.value)} placeholder="https://open.spotify.com/track/..." className="h-10 text-sm" />
-                      </div>
-                    </div>
                   ) : (
-                    <label className="flex items-center justify-center h-20 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50">
-                      <div className="text-center">
-                        <Upload className="w-5 h-5 text-muted-foreground/60 mx-auto mb-1" />
-                        <span className="text-xs text-muted-foreground">Upload audio file</span>
+                    <>
+                      <div className="flex gap-2 mb-3">
+                        <Button variant={songMode === "embed" ? "default" : "outline"} size="sm" onClick={() => setSongMode("embed")}>
+                          <Music className="w-3.5 h-3.5 mr-1.5" />
+                          Link
+                        </Button>
+                        <Button variant={songMode === "upload" ? "default" : "outline"} size="sm" onClick={() => setSongMode("upload")}>
+                          <Upload className="w-3.5 h-3.5 mr-1.5" />
+                          Upload
+                        </Button>
                       </div>
-                      <input type="file" accept="audio/*" onChange={(e) => setSongFile(e.target.files?.[0] || null)} className="hidden" />
-                    </label>
-                  )}
 
-                  {songMode === "upload" && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Title</Label>
-                        <Input value={songTitle} onChange={(e) => setSongTitle(e.target.value)} placeholder="Song title" className="h-10 text-sm" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Artist</Label>
-                        <Input value={songArtist} onChange={(e) => setSongArtist(e.target.value)} placeholder="Artist name" className="h-10 text-sm" />
-                      </div>
-                    </div>
-                  )}
+                      {songMode === "embed" ? (
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <FieldLabel icon={Music} className="text-xs font-normal">Spotify or Apple Music Link</FieldLabel>
+                            <Input value={songLink} onChange={(e) => setSongLink(e.target.value)} placeholder="https://open.spotify.com/track/..." className="h-10 text-sm" />
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="flex items-center justify-center h-20 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50">
+                          <div className="text-center">
+                            <Upload className="w-5 h-5 text-muted-foreground/60 mx-auto mb-1" />
+                            <span className="text-xs text-muted-foreground">Upload audio file</span>
+                          </div>
+                          <input type="file" accept="audio/*" onChange={(e) => setSongFile(e.target.files?.[0] || null)} className="hidden" />
+                        </label>
+                      )}
 
-                  <Button size="sm" onClick={handleSaveSong} disabled={savingSong} className="bg-primary text-primary-foreground">
-                    {savingSong ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : null}
-                    Save Song
-                  </Button>
+                      {songMode === "upload" && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <FieldLabel icon={Type} className="text-xs font-normal">Title</FieldLabel>
+                            <Input value={songTitle} onChange={(e) => setSongTitle(e.target.value)} placeholder="Song title" className="h-10 text-sm" />
+                          </div>
+                          <div className="space-y-1">
+                            <FieldLabel icon={User} className="text-xs font-normal">Artist</FieldLabel>
+                            <Input value={songArtist} onChange={(e) => setSongArtist(e.target.value)} placeholder="Artist name" className="h-10 text-sm" />
+                          </div>
+                        </div>
+                      )}
+
+                      <Button size="sm" onClick={handleSaveSong} disabled={savingSong} className="bg-primary text-primary-foreground">
+                        {savingSong ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : null}
+                        Save Song
+                      </Button>
+                    </>
+                  )}
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -923,6 +973,7 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
               <AccordionTrigger className="font-serif text-lg">
                 <AccordionSectionLabel
                   title="Video Tributes"
+                  icon={Video}
                   meta={
                     videos.length > 0
                       ? `${videos.length} ${videos.length === 1 ? "video" : "videos"}`
@@ -935,11 +986,11 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
                   <Card className="border-border/50">
                     <CardContent className="p-4 space-y-3">
                       <div className="space-y-1">
-                        <Label className="text-xs">YouTube or Vimeo URL</Label>
+                        <FieldLabel icon={Video} className="text-xs font-normal">YouTube or Vimeo URL</FieldLabel>
                         <Input value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="h-10 text-sm" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Title (optional)</Label>
+                        <FieldLabel icon={Type} className="text-xs font-normal">Title (optional)</FieldLabel>
                         <Input value={newVideoTitle} onChange={(e) => setNewVideoTitle(e.target.value)} placeholder="Video title" className="h-10 text-sm" />
                       </div>
                       <Button size="sm" onClick={handleAddVideo} disabled={addingVideo || !newVideoUrl.trim()} className="bg-primary text-primary-foreground">
@@ -975,6 +1026,7 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
               <AccordionTrigger className="font-serif text-lg">
                 <AccordionSectionLabel
                   title="Guestbook"
+                  icon={MessageSquare}
                   meta={pendingCount > 0 ? `${pendingCount} pending` : undefined}
                   metaClassName="text-destructive/70"
                 />
