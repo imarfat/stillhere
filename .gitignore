@@ -44,6 +44,10 @@ public/uploads/
 page-response.html
 tool-results/
 .zscripts/dev.pid
+upload/
+examples/
+mini-services/
+worklog.md
 
 # vercel
 .vercel
