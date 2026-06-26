@@ -43,7 +43,7 @@ public/uploads/
 # dev artifacts
 page-response.html
 tool-results/
-.zscripts/dev.pid
+.zscripts/
 upload/
 examples/
 mini-services/
