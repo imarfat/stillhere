@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { isAllowedMediaUrl } from "@/lib/security"
 
 async function checkOwner(memorialId: string, userId: string) {
   const memorial = await db.memorial.findUnique({ where: { id: memorialId } })
@@ -30,8 +31,13 @@ export async function POST(
     const body = await request.json()
     const { url } = body
 
-    if (!url) {
+    if (!url || typeof url !== "string" || !url.trim()) {
       return NextResponse.json({ error: "Photo URL is required" }, { status: 400 })
+    }
+
+    const trimmedUrl = url.trim()
+    if (!isAllowedMediaUrl(trimmedUrl)) {
+      return NextResponse.json({ error: "Invalid photo URL" }, { status: 400 })
     }
 
     const maxSortOrder = await db.photo.findFirst({
@@ -43,7 +49,7 @@ export async function POST(
     const photo = await db.photo.create({
       data: {
         memorialId,
-        url,
+        url: trimmedUrl,
         sortOrder: (maxSortOrder?.sortOrder ?? -1) + 1,
       },
     })

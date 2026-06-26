@@ -1,4 +1,5 @@
 import { getSongEmbedHeight } from "@/lib/slug"
+import { getSafeEmbedUrl, getSafeMediaUrl } from "@/lib/security"
 import { cn } from "@/lib/utils"
 
 interface SongEmbedProps {
@@ -17,18 +18,22 @@ function getEmbedStyles(embedUrl: string) {
 }
 
 export function SongEmbed({ embedUrl, className }: SongEmbedProps) {
-  const height = getSongEmbedHeight(embedUrl)
-  const { bg, border } = getEmbedStyles(embedUrl)
+  const safeUrl = getSafeEmbedUrl(embedUrl)
+  if (!safeUrl) return null
+
+  const height = getSongEmbedHeight(safeUrl)
+  const { bg, border } = getEmbedStyles(safeUrl)
 
   return (
     <div className={cn("rounded-2xl overflow-hidden border", bg, border, className)}>
       <iframe
-        src={embedUrl}
+        src={safeUrl}
         style={{ height }}
         className="w-full block border-0"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy"
         title="Favourite song"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       />
     </div>
   )
@@ -42,6 +47,9 @@ interface SongAudioPlayerProps {
 }
 
 export function SongAudioPlayer({ url, title, artist, className }: SongAudioPlayerProps) {
+  const safeUrl = getSafeMediaUrl(url)
+  if (!safeUrl) return null
+
   return (
     <div
       className={cn(
@@ -60,8 +68,29 @@ export function SongAudioPlayer({ url, title, artist, className }: SongAudioPlay
             <p className="text-sm text-muted-foreground">{artist}</p>
           )}
         </div>
-        <audio controls src={url} className="w-full sm:max-w-sm shrink-0" />
+        <audio controls src={safeUrl} className="w-full sm:max-w-sm shrink-0" />
       </div>
     </div>
+  )
+}
+
+interface SafeVideoEmbedProps {
+  embedUrl: string
+  className?: string
+}
+
+export function SafeVideoEmbed({ embedUrl, className }: SafeVideoEmbedProps) {
+  const safeUrl = getSafeEmbedUrl(embedUrl)
+  if (!safeUrl) return null
+
+  return (
+    <iframe
+      src={safeUrl}
+      className={cn("w-full h-full", className)}
+      allowFullScreen
+      loading="lazy"
+      title="Video tribute"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"
+    />
   )
 }

@@ -32,6 +32,10 @@ export async function PATCH(
     const body = await request.json()
     const { approved } = body
 
+    if (typeof approved !== "boolean") {
+      return NextResponse.json({ error: "Invalid approval status" }, { status: 400 })
+    }
+
     const updated = await db.guestbookEntry.update({
       where: { id: entryId },
       data: { approved },

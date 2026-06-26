@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
 import { hashPasswordResetToken } from "@/lib/password-reset"
+import { LIMITS } from "@/lib/security"
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +20,13 @@ export async function POST(request: NextRequest) {
     if (password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters" },
+        { status: 400 }
+      )
+    }
+
+    if (password.length > LIMITS.password) {
+      return NextResponse.json(
+        { error: "Password is too long" },
         { status: 400 }
       )
     }

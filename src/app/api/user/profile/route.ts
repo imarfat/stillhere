@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { LIMITS, sanitizeOptionalText } from "@/lib/security"
 
 export async function PUT(request: Request) {
   try {
@@ -20,7 +21,7 @@ export async function PUT(request: Request) {
 
     await db.user.update({
       where: { id: userId },
-      data: { name: name || null },
+      data: { name: sanitizeOptionalText(name, LIMITS.userName) },
     })
 
     return NextResponse.json({ success: true })

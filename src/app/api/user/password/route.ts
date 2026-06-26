@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import bcrypt from "bcryptjs"
+import { LIMITS } from "@/lib/security"
 
 export async function PUT(request: Request) {
   try {
@@ -21,6 +22,10 @@ export async function PUT(request: Request) {
 
     if (newPassword.length < 8) {
       return NextResponse.json({ error: "New password must be at least 8 characters" }, { status: 400 })
+    }
+
+    if (newPassword.length > LIMITS.password) {
+      return NextResponse.json({ error: "New password is too long" }, { status: 400 })
     }
 
     const user = await db.user.findUnique({ where: { id: userId } })

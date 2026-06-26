@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { storeUploadedFile } from "@/lib/upload-storage"
+import { validateUploadedFile } from "@/lib/upload-validation"
+
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,24 +21,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
-    const allowedTypes = ["image/", "audio/"]
-    const isValidType = allowedTypes.some((type) => file.type.startsWith(type))
-    if (!isValidType) {
-      return NextResponse.json(
-        { error: "Only image and audio files are allowed" },
-        { status: 400 }
-      )
+    const validated = await validateUploadedFile(file, MAX_UPLOAD_SIZE)
+    if ("error" in validated) {
+      return NextResponse.json({ error: validated.error }, { status: 400 })
     }
 
-    const maxSize = 10 * 1024 * 1024 // 10MB
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: "File size must be less than 10MB" },
-        { status: 400 }
-      )
-    }
-
-    const url = await storeUploadedFile(session.user.id, file)
+    const url = await storeUploadedFile(session.user.id, validated.buffer, validated.ext)
 
     return NextResponse.json({ url }, { status: 201 })
   } catch (error) {

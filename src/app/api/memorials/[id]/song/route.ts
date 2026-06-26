@@ -3,6 +3,11 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { parseSongUrl } from "@/lib/slug"
+import {
+  isAllowedAudioUrl,
+  LIMITS,
+  sanitizeOptionalText,
+} from "@/lib/security"
 
 export async function PUT(
   request: NextRequest,
@@ -31,10 +36,13 @@ export async function PUT(
     const updateData: Record<string, string | null> = {}
 
     if (songUrl) {
-      updateData.songUrl = songUrl
+      if (typeof songUrl !== "string" || !isAllowedAudioUrl(songUrl.trim())) {
+        return NextResponse.json({ error: "Invalid audio file URL" }, { status: 400 })
+      }
+      updateData.songUrl = songUrl.trim()
       updateData.songEmbedUrl = null
-      updateData.songTitle = songTitle || null
-      updateData.songArtist = songArtist || null
+      updateData.songTitle = sanitizeOptionalText(songTitle, LIMITS.songTitle)
+      updateData.songArtist = sanitizeOptionalText(songArtist, LIMITS.songArtist)
     } else if (songEmbedUrl !== undefined) {
       if (!songEmbedUrl) {
         updateData.songEmbedUrl = null
@@ -53,8 +61,12 @@ export async function PUT(
         updateData.songArtist = null
       }
     } else {
-      if (songTitle !== undefined) updateData.songTitle = songTitle || null
-      if (songArtist !== undefined) updateData.songArtist = songArtist || null
+      if (songTitle !== undefined) {
+        updateData.songTitle = sanitizeOptionalText(songTitle, LIMITS.songTitle)
+      }
+      if (songArtist !== undefined) {
+        updateData.songArtist = sanitizeOptionalText(songArtist, LIMITS.songArtist)
+      }
     }
 
     const updated = await db.memorial.update({

@@ -20,7 +20,8 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { formatDate, formatRelativeTime } from "@/lib/slug"
-import { SongEmbed, SongAudioPlayer } from "@/components/app/SongEmbed"
+import { SongEmbed, SongAudioPlayer, SafeVideoEmbed } from "@/components/app/SongEmbed"
+import { getSafeMediaUrl } from "@/lib/security"
 import { LifeTimeline } from "@/components/app/LifeTimeline"
 import { MemorialGutterDots } from "@/components/app/MemorialHeroDots"
 
@@ -317,8 +318,9 @@ export function MemorialPage({ slug }: { slug: string }) {
     return null
   }
 
-  const photos = data?.photos ?? []
+  const photos = (data?.photos ?? []).filter((photo) => getSafeMediaUrl(photo.url))
   const activePhoto = photos[currentPhoto]
+  const coverPhotoUrl = getSafeMediaUrl(data?.coverPhotoUrl ?? null)
 
   return (
     <div className="min-h-dvh bg-background">
@@ -385,10 +387,10 @@ export function MemorialPage({ slug }: { slug: string }) {
       <section ref={heroRef} className="memorial-hero relative">
         <div className="memorial-hero-inner">
           <div className="memorial-hero-photo">
-            {data.coverPhotoUrl ? (
+            {coverPhotoUrl ? (
               <>
                 <motion.img
-                  src={data.coverPhotoUrl}
+                  src={coverPhotoUrl}
                   alt=""
                   initial={{ opacity: 0, scale: 1.04 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -566,14 +568,9 @@ export function MemorialPage({ slug }: { slug: string }) {
           {data.bio && (
             <MemorialAnimatedSection className="py-6">
               <MemorialSectionTitle icon={BookOpen}>Their Story</MemorialSectionTitle>
-              <div
-                className="prose prose-sm max-w-none text-muted-foreground leading-relaxed font-sans
-                  [&_h2]:font-serif [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-6 [&_h2]:mb-3
-                  [&_h3]:font-serif [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-4 [&_h3]:mb-2
-                  [&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground
-                  [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1"
-                dangerouslySetInnerHTML={{ __html: data.bio }}
-              />
+              <div className="text-sm text-muted-foreground leading-relaxed font-sans whitespace-pre-wrap">
+                {data.bio}
+              </div>
             </MemorialAnimatedSection>
           )}
 
@@ -674,7 +671,7 @@ export function MemorialPage({ slug }: { slug: string }) {
                 {data.videos.map((video) => (
                   <div key={video.id} className="rounded-2xl overflow-hidden bg-card border border-border/50">
                     <div className="aspect-video">
-                      <iframe src={video.embedUrl} className="w-full h-full" allowFullScreen />
+                      <SafeVideoEmbed embedUrl={video.embedUrl} />
                     </div>
                     {video.title && (
                       <p className="px-4 py-2 text-sm font-medium text-center">{video.title}</p>

@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from "fs/promises"
 import path from "path"
 import { put } from "@vercel/blob"
+import { isSafeUserId } from "@/lib/security"
 
-function buildLocalFilename(originalName: string) {
-  const ext = path.extname(originalName) || ".bin"
+function buildSafeFilename(ext: string) {
   return `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
 }
 
@@ -15,21 +15,22 @@ function shouldUseBlobStorage() {
   )
 }
 
-export async function storeUploadedFile(userId: string, file: File) {
-  const filename = buildLocalFilename(file.name)
+export async function storeUploadedFile(userId: string, buffer: Buffer, ext: string) {
+  if (!isSafeUserId(userId)) {
+    throw new Error("Invalid user id")
+  }
+
+  const filename = buildSafeFilename(ext)
 
   if (shouldUseBlobStorage()) {
-    const blob = await put(`uploads/${userId}/${filename}`, file, {
+    const blob = await put(`uploads/${userId}/${filename}`, buffer, {
       access: "public",
       addRandomSuffix: false,
     })
     return blob.url
   }
 
-  const bytes = await file.arrayBuffer()
-  const buffer = Buffer.from(bytes)
   const uploadDir = path.join(process.cwd(), "public", "uploads", userId)
-
   await mkdir(uploadDir, { recursive: true })
 
   const filepath = path.join(uploadDir, filename)

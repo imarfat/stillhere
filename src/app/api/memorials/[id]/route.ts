@@ -3,6 +3,12 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { normalizeSongEmbedUrl } from "@/lib/slug"
+import {
+  isAllowedMediaUrl,
+  LIMITS,
+  sanitizeOptionalText,
+  sanitizeRequiredText,
+} from "@/lib/security"
 
 async function getMemorialWithOwnerCheck(
   id: string,
@@ -71,13 +77,37 @@ export async function PUT(
     const { name, dob, dod, tagline, restingPlace, coverPhotoUrl, bio } = body
 
     const updateData: Record<string, unknown> = {}
-    if (name !== undefined) updateData.name = typeof name === "string" ? name.trim() : name
+
+    if (name !== undefined) {
+      const sanitizedName = sanitizeRequiredText(name, LIMITS.name)
+      if (!sanitizedName) {
+        return NextResponse.json({ error: "Name is required" }, { status: 400 })
+      }
+      updateData.name = sanitizedName
+    }
+
     if (dob !== undefined) updateData.dob = dob ? new Date(dob) : null
     if (dod !== undefined) updateData.dod = dod ? new Date(dod) : null
-    if (tagline !== undefined) updateData.tagline = tagline || null
-    if (restingPlace !== undefined) updateData.restingPlace = restingPlace || null
-    if (coverPhotoUrl !== undefined) updateData.coverPhotoUrl = coverPhotoUrl || null
-    if (bio !== undefined) updateData.bio = bio || null
+    if (tagline !== undefined) {
+      updateData.tagline = sanitizeOptionalText(tagline, LIMITS.tagline)
+    }
+    if (restingPlace !== undefined) {
+      updateData.restingPlace = sanitizeOptionalText(restingPlace, LIMITS.restingPlace)
+    }
+    if (coverPhotoUrl !== undefined) {
+      if (coverPhotoUrl && typeof coverPhotoUrl === "string" && coverPhotoUrl.trim()) {
+        const trimmed = coverPhotoUrl.trim()
+        if (!isAllowedMediaUrl(trimmed)) {
+          return NextResponse.json({ error: "Invalid cover photo URL" }, { status: 400 })
+        }
+        updateData.coverPhotoUrl = trimmed
+      } else {
+        updateData.coverPhotoUrl = null
+      }
+    }
+    if (bio !== undefined) {
+      updateData.bio = sanitizeOptionalText(bio, LIMITS.bio)
+    }
 
     const updated = await db.memorial.update({
       where: { id },

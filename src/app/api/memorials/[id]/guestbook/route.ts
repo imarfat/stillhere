@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { LIMITS, sanitizeRequiredText } from "@/lib/security"
 
 export async function GET(
   _request: NextRequest,
@@ -56,26 +57,21 @@ export async function POST(
     const body = await request.json()
     const { visitorName, message } = body
 
-    if (!visitorName || typeof visitorName !== "string" || visitorName.trim().length === 0) {
+    const sanitizedName = sanitizeRequiredText(visitorName, LIMITS.visitorName)
+    if (!sanitizedName) {
       return NextResponse.json({ error: "Visitor name is required" }, { status: 400 })
     }
 
-    if (!message || typeof message !== "string" || message.trim().length === 0) {
+    const sanitizedMessage = sanitizeRequiredText(message, LIMITS.guestbookMessage)
+    if (!sanitizedMessage) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 })
-    }
-
-    if (message.length > 2000) {
-      return NextResponse.json(
-        { error: "Message must be under 2000 characters" },
-        { status: 400 }
-      )
     }
 
     const entry = await db.guestbookEntry.create({
       data: {
         memorialId,
-        visitorName: visitorName.trim(),
-        message: message.trim(),
+        visitorName: sanitizedName,
+        message: sanitizedMessage,
         approved: false,
       },
     })

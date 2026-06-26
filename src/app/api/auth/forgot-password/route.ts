@@ -7,14 +7,15 @@ import {
   hashPasswordResetToken,
 } from "@/lib/password-reset"
 import { sendPasswordResetEmail } from "@/lib/send-email"
+import { isValidEmail, LIMITS } from "@/lib/security"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase().slice(0, LIMITS.email) : ""
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 })
+    if (!email || !isValidEmail(email)) {
+      return NextResponse.json({ error: "A valid email is required" }, { status: 400 })
     }
 
     const user = await db.user.findUnique({ where: { email } })

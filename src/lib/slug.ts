@@ -1,3 +1,5 @@
+import { isAllowedEmbedUrl } from "@/lib/security"
+
 const LATIN_SLUG_REPLACEMENTS: Record<string, string> = {
   ß: "ss",
   æ: "ae",
@@ -77,10 +79,10 @@ export function parseVimeoUrl(url: string): string | null {
 
 export function parseVideoUrl(url: string): { embedUrl: string; platform: string } | null {
   const youtube = parseYouTubeUrl(url)
-  if (youtube) return { embedUrl: youtube, platform: "YouTube" }
+  if (youtube && isAllowedEmbedUrl(youtube)) return { embedUrl: youtube, platform: "YouTube" }
 
   const vimeo = parseVimeoUrl(url)
-  if (vimeo) return { embedUrl: vimeo, platform: "Vimeo" }
+  if (vimeo && isAllowedEmbedUrl(vimeo)) return { embedUrl: vimeo, platform: "Vimeo" }
 
   return null
 }
@@ -105,8 +107,28 @@ export function parseSpotifyUrl(url: string): string | null {
 }
 
 export function parseAppleMusicUrl(url: string): string | null {
-  if (url.includes("embed.music.apple.com")) {
-    return url
+  try {
+    const parsed = new URL(url.trim())
+    if (parsed.protocol !== "https:") return null
+
+    if (parsed.hostname === "embed.music.apple.com") {
+      const pathMatch = parsed.pathname.match(/^\/([a-z]{2})\/(song|album|playlist)\/([^/]+)$/)
+      if (!pathMatch) return null
+
+      const [, locale, type, id] = pathMatch
+      if (type === "album") {
+        const trackId = parsed.searchParams.get("i")
+        if (parsed.search && (!trackId || !/^\d+$/.test(trackId))) return null
+        return trackId
+          ? `https://embed.music.apple.com/${locale}/album/${id}?i=${trackId}`
+          : `https://embed.music.apple.com/${locale}/album/${id}`
+      }
+
+      if (parsed.search) return null
+      return `https://embed.music.apple.com/${locale}/${type}/${id}`
+    }
+  } catch {
+    return null
   }
 
   const songMatch = url.match(/music\.apple\.com\/([a-z]{2})\/song\/[^/?]+\/(\d+)/)
@@ -131,17 +153,19 @@ export function parseAppleMusicUrl(url: string): string | null {
 
 export function parseSongUrl(url: string): { embedUrl: string; platform: string } | null {
   const spotify = parseSpotifyUrl(url)
-  if (spotify) return { embedUrl: spotify, platform: "Spotify" }
+  if (spotify && isAllowedEmbedUrl(spotify)) return { embedUrl: spotify, platform: "Spotify" }
 
   const apple = parseAppleMusicUrl(url)
-  if (apple) return { embedUrl: apple, platform: "Apple Music" }
+  if (apple && isAllowedEmbedUrl(apple)) return { embedUrl: apple, platform: "Apple Music" }
 
   return null
 }
 
 export function normalizeSongEmbedUrl(url: string | null | undefined): string | null {
   if (!url) return null
-  return parseSongUrl(url)?.embedUrl ?? null
+  const parsed = parseSongUrl(url)
+  if (parsed) return parsed.embedUrl
+  return isAllowedEmbedUrl(url) ? url : null
 }
 
 export function getSongEmbedHeight(embedUrl: string): number {

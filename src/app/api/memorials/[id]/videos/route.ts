@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { parseVideoUrl } from "@/lib/slug"
+import { LIMITS, sanitizeOptionalText } from "@/lib/security"
 
 export async function POST(
   request: NextRequest,
@@ -28,11 +29,11 @@ export async function POST(
     const body = await request.json()
     const { url, title } = body
 
-    if (!url) {
+    if (!url || typeof url !== "string" || !url.trim()) {
       return NextResponse.json({ error: "Video URL is required" }, { status: 400 })
     }
 
-    const parsed = parseVideoUrl(url)
+    const parsed = parseVideoUrl(url.trim())
     if (!parsed) {
       return NextResponse.json(
         { error: "Only YouTube and Vimeo URLs are supported" },
@@ -44,7 +45,7 @@ export async function POST(
       data: {
         memorialId,
         embedUrl: parsed.embedUrl,
-        title: title || null,
+        title: sanitizeOptionalText(title, LIMITS.videoTitle),
       },
     })
 

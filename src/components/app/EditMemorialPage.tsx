@@ -22,7 +22,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { formatDate } from "@/lib/slug"
-import { SongEmbed, SongAudioPlayer } from "@/components/app/SongEmbed"
+import { SongEmbed, SongAudioPlayer, SafeVideoEmbed } from "@/components/app/SongEmbed"
 import { CoverHeroPreview } from "@/components/app/CoverHeroPreview"
 import { invalidateDashboardMemorials } from "@/lib/dashboard-cache"
 import { invalidateSettingsStats } from "@/lib/settings-cache"
@@ -1004,7 +1004,7 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
                     <div key={video.id} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
                       <div className="flex-1 min-w-0">
                         <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-2">
-                          <iframe src={video.embedUrl} className="w-full h-full" allowFullScreen />
+                          <SafeVideoEmbed embedUrl={video.embedUrl} />
                         </div>
                         {video.title && <p className="text-sm font-medium">{video.title}</p>}
                       </div>

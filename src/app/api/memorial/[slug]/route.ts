@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { normalizeSongEmbedUrl } from "@/lib/slug"
+import { getSafeEmbedUrl, getSafeMediaUrl } from "@/lib/security"
 
 export async function GET(
   _request: NextRequest,
@@ -43,7 +44,15 @@ export async function GET(
 
     const result = {
       ...memorial,
+      coverPhotoUrl: getSafeMediaUrl(memorial.coverPhotoUrl),
+      songUrl: getSafeMediaUrl(memorial.songUrl),
       songEmbedUrl: normalizeSongEmbedUrl(memorial.songEmbedUrl),
+      photos: memorial.photos
+        .map((photo) => ({ ...photo, url: getSafeMediaUrl(photo.url) }))
+        .filter((photo): photo is typeof photo & { url: string } => Boolean(photo.url)),
+      videos: memorial.videos
+        .map((video) => ({ ...video, embedUrl: getSafeEmbedUrl(video.embedUrl) }))
+        .filter((video): video is typeof video & { embedUrl: string } => Boolean(video.embedUrl)),
       tributeCounts: { candles, flowers },
     }
 

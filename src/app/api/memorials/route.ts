@@ -3,6 +3,12 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { generateUniqueSlug } from "@/lib/slug"
+import {
+  isAllowedMediaUrl,
+  LIMITS,
+  sanitizeOptionalText,
+  sanitizeRequiredText,
+} from "@/lib/security"
 
 export async function GET() {
   try {
@@ -48,11 +54,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, dob, dod, tagline, restingPlace, coverPhotoUrl, bio } = body
 
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
+    const sanitizedName = sanitizeRequiredText(name, LIMITS.name)
+    if (!sanitizedName) {
       return NextResponse.json(
         { error: "Name is required" },
         { status: 400 }
       )
+    }
+
+    const sanitizedCover =
+      typeof coverPhotoUrl === "string" && coverPhotoUrl.trim()
+        ? coverPhotoUrl.trim()
+        : null
+    if (sanitizedCover && !isAllowedMediaUrl(sanitizedCover)) {
+      return NextResponse.json({ error: "Invalid cover photo URL" }, { status: 400 })
     }
 
     const birthYear = dob ? new Date(dob).getFullYear() : undefined
@@ -62,19 +77,19 @@ export async function POST(request: NextRequest) {
       await db.memorial.findMany({ select: { slug: true } })
     ).map((m) => m.slug)
 
-    const slug = await generateUniqueSlug(name, birthYear, deathYear, existingSlugs)
+    const slug = await generateUniqueSlug(sanitizedName, birthYear, deathYear, existingSlugs)
 
     const memorial = await db.memorial.create({
       data: {
         userId: session.user.id,
         slug,
-        name: name.trim(),
+        name: sanitizedName,
         dob: dob ? new Date(dob) : null,
         dod: dod ? new Date(dod) : null,
-        tagline: tagline || null,
-        restingPlace: restingPlace || null,
-        coverPhotoUrl: coverPhotoUrl || null,
-        bio: bio || null,
+        tagline: sanitizeOptionalText(tagline, LIMITS.tagline),
+        restingPlace: sanitizeOptionalText(restingPlace, LIMITS.restingPlace),
+        coverPhotoUrl: sanitizedCover,
+        bio: sanitizeOptionalText(bio, LIMITS.bio),
       },
     })
 

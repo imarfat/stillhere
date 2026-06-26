@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { LIMITS, sanitizeOptionalText, sanitizeRequiredText } from "@/lib/security"
 
 export async function POST(
   request: NextRequest,
@@ -27,7 +28,8 @@ export async function POST(
     const body = await request.json()
     const { eventDate, title, description } = body
 
-    if (!title || typeof title !== "string" || title.trim().length === 0) {
+    const sanitizedTitle = sanitizeRequiredText(title, LIMITS.timelineTitle)
+    if (!sanitizedTitle) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 })
     }
 
@@ -35,8 +37,8 @@ export async function POST(
       data: {
         memorialId,
         eventDate: eventDate ? new Date(eventDate) : null,
-        title: title.trim(),
-        description: description || null,
+        title: sanitizedTitle,
+        description: sanitizeOptionalText(description, LIMITS.timelineDescription),
       },
     })
 

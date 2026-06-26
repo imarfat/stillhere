@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { LIMITS, sanitizeOptionalText } from "@/lib/security"
 
 export async function GET(
   _request: NextRequest,
@@ -60,8 +61,8 @@ export async function POST(
       data: {
         memorialId,
         kind,
-        visitorName: visitorName || null,
-        note: note || null,
+        visitorName: sanitizeOptionalText(visitorName, LIMITS.visitorName),
+        note: sanitizeOptionalText(note, LIMITS.tributeNote),
       },
     })
 

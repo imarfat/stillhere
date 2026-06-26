@@ -1,28 +1,43 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
+import { isValidEmail, LIMITS, sanitizeOptionalText } from "@/lib/security"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { email, password, name } = body
 
-    if (!email || !password) {
+    const normalizedEmail =
+      typeof email === "string" ? email.trim().toLowerCase().slice(0, LIMITS.email) : ""
+
+    if (!normalizedEmail || !password || typeof password !== "string") {
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
       )
     }
 
-    if (password.length < 6) {
+    if (!isValidEmail(normalizedEmail)) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 })
+    }
+
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
+        { error: "Password must be at least 8 characters" },
+        { status: 400 }
+      )
+    }
+
+    if (password.length > LIMITS.password) {
+      return NextResponse.json(
+        { error: "Password is too long" },
         { status: 400 }
       )
     }
 
     const existingUser = await db.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: normalizedEmail },
     })
 
     if (existingUser) {
@@ -36,9 +51,9 @@ export async function POST(request: NextRequest) {
 
     const user = await db.user.create({
       data: {
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         password: hashedPassword,
-        name: name || null,
+        name: sanitizeOptionalText(name, LIMITS.userName),
       },
       select: {
         id: true,
