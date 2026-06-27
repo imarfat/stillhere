@@ -406,7 +406,7 @@
     gap: 0;
     width: 100%;
     overflow: visible;
-    margin-top: -0.25rem;
+    margin-top: -0.45rem;
   }
   .memorial-hero-headline .memorial-hero-dates {
     margin-top: -0.04em;
@@ -604,6 +604,49 @@
   @media (max-width: 640px) {
     .hero-line-art {
       display: none;
+    }
+  }
+
+  /* Short phones (e.g. iPhone SE) — keep mockup below CTAs */
+  @media (max-height: 680px) and (max-width: 1023px) {
+    .hero-mobile-copy {
+      padding-top: 3.75rem;
+    }
+    .hero-mobile-copy .hero-mobile-title {
+      margin-bottom: 1rem;
+    }
+    .hero-mobile-copy .hero-mobile-desc {
+      margin-bottom: 1.5rem;
+    }
+    .hero-mobile-mockup-img {
+      max-height: min(36vh, 15rem);
+      width: auto;
+      max-width: min(100%, 20rem);
+      margin-inline: auto;
+    }
+  }
+
+  /* Medium & tall phones — size mockup to available space below hero copy */
+  @media (min-height: 681px) and (max-width: 1023px) {
+    .hero-mobile-mockup-img {
+      max-height: min(46vh, calc(100dvh - 30.5rem));
+      width: auto;
+      max-width: min(100%, 30rem);
+      margin-inline: auto;
+    }
+  }
+
+  /* Narrower medium phones (e.g. Galaxy S8+) — trim copy spacing for clearance */
+  @media (min-height: 681px) and (max-height: 780px) and (max-width: 1023px) {
+    .hero-mobile-copy .hero-mobile-desc {
+      margin-bottom: 1.75rem;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .hero-mobile-copy .hero-mobile-ctas {
+      position: relative;
+      z-index: 20;
     }
   }
 

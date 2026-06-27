@@ -6,8 +6,10 @@ import { useSession } from "next-auth/react"
 import { useTheme } from "next-themes"
 import { useNavigation } from "@/lib/store"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
+import Link from "next/link"
 import { HeroLineArt } from "@/components/app/HeroLineArt"
-import { Heart, Flame, Flower2, Share2, Image, Music, Clock, ArrowRight, Sun, Moon, Sparkles, Feather, Quote, Star, ChevronDown } from "lucide-react"
+import { Heart, Flame, Flower2, Share2, Image as ImageIcon, Music, Clock, ArrowRight, Sun, Moon, BookHeart, Feather, Quote, Star, ScanLine, ChevronDown } from "lucide-react"
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -23,6 +25,48 @@ const stagger: Variants = {
     transition: { staggerChildren: 0.08 },
   },
 }
+
+const mobileHeroDots = [
+  { top: "8%", left: "5%", size: "w-1 h-1", color: "bg-primary/30", anim: "animate-float", delay: "0s" },
+  { top: "12%", right: "7%", size: "w-0.5 h-0.5", color: "bg-amber-light/25", anim: "animate-float-slow", delay: "1.1s" },
+  { top: "6%", left: "18%", size: "w-0.5 h-0.5", color: "bg-primary/20", anim: "animate-float-slow", delay: "0.5s" },
+  { top: "10%", right: "14%", size: "w-1 h-1", color: "bg-accent/25", anim: "animate-float", delay: "1.8s" },
+  { top: "20%", left: "10%", size: "w-1 h-1", color: "bg-primary/30", anim: "animate-float", delay: "0.3s" },
+  { top: "24%", right: "8%", size: "w-0.5 h-0.5", color: "bg-candle/30", anim: "animate-float-slow", delay: "2.2s" },
+  { top: "35%", right: "15%", size: "w-1.5 h-1.5", color: "bg-primary/20", anim: "animate-float-slow", delay: "0.8s" },
+  { top: "38%", left: "4%", size: "w-1 h-1", color: "bg-accent/30", anim: "animate-float", delay: "0.9s" },
+  { top: "44%", right: "5%", size: "w-0.5 h-0.5", color: "bg-primary/25", anim: "animate-float-slow", delay: "2.1s" },
+  { top: "52%", left: "8%", size: "w-0.5 h-0.5", color: "bg-amber-light/20", anim: "animate-float", delay: "1.6s" },
+  { top: "56%", right: "11%", size: "w-1 h-1", color: "bg-primary/15", anim: "animate-float-slow", delay: "0.2s" },
+  { top: "60%", right: "25%", size: "w-0.5 h-0.5", color: "bg-amber-light/30", anim: "animate-float-slow", delay: "1.6s" },
+  { top: "68%", left: "12%", size: "w-1 h-1", color: "bg-accent/25", anim: "animate-float", delay: "1.4s" },
+  { top: "72%", right: "10%", size: "w-1.5 h-1.5", color: "bg-primary/20", anim: "animate-float-slow", delay: "0.7s" },
+  { bottom: "30%", left: "20%", size: "w-1 h-1", color: "bg-accent/30", anim: "animate-float", delay: "1.2s" },
+  { bottom: "22%", left: "6%", size: "w-0.5 h-0.5", color: "bg-candle/30", anim: "animate-float", delay: "2.4s" },
+  { bottom: "18%", left: "16%", size: "w-1 h-1", color: "bg-accent/25", anim: "animate-float", delay: "2s" },
+  { bottom: "14%", right: "8%", size: "w-0.5 h-0.5", color: "bg-primary/30", anim: "animate-float-slow", delay: "1s" },
+  { bottom: "26%", right: "18%", size: "w-0.5 h-0.5", color: "bg-candle/40", anim: "animate-float-slow", delay: "1.3s" },
+  { top: "28%", left: "22%", size: "w-0.5 h-0.5", color: "bg-primary/15", anim: "animate-float", delay: "1.9s" },
+  { top: "32%", right: "20%", size: "w-0.5 h-0.5", color: "bg-accent/20", anim: "animate-float-slow", delay: "0.6s" },
+] as const
+
+const memoryAliveFeatures = [
+  {
+    icon: Flame,
+    title: "Lasting Tributes",
+    description: "Leave candles, flowers, and heartfelt messages that family and friends can see and add to.",
+  },
+  {
+    icon: ImageIcon,
+    title: "Share Memories",
+    description: "Upload photos, add life events to a timeline, embed videos, and write their story in a beautiful biography.",
+  },
+  {
+    icon: Share2,
+    title: "Easy Sharing",
+    description: "Generate QR codes for printed materials. Share instantly via WhatsApp, Facebook, or a simple link.",
+  },
+] as const
 
 const desktopHeroDots = [
   { top: "10%", left: "18%", size: "w-0.5 h-0.5", color: "bg-primary/20", anim: "animate-float-slow", delay: "0.4s" },
@@ -84,15 +128,24 @@ export function LandingPage() {
         <div className="hero-ambient absolute bottom-0 left-0 w-[400px] h-[400px] max-sm:hidden bg-accent/[0.03] rounded-full blur-[100px]" />
         <div className="hero-ambient absolute top-0 right-0 w-[300px] h-[300px] max-sm:hidden bg-flower/[0.02] rounded-full blur-[80px]" />
 
-        {/* Decorative floating elements */}
-        <div className="absolute top-[20%] left-[10%] w-1 h-1 rounded-full bg-primary/30 animate-float" />
-        <div className="absolute top-[35%] right-[15%] w-1.5 h-1.5 rounded-full bg-primary/20 animate-float-slow" />
-        <div className="absolute bottom-[30%] left-[20%] w-1 h-1 rounded-full bg-accent/30 animate-float" />
-        <div className="absolute top-[60%] right-[25%] w-0.5 h-0.5 rounded-full bg-amber-light/30 animate-float-slow" />
+        {/* Decorative floating elements — mobile & tablet */}
+        {mobileHeroDots.map((dot, i) => (
+          <div
+            key={`mobile-${i}`}
+            className={`absolute xl:hidden rounded-full pointer-events-none ${dot.size} ${dot.color} ${dot.anim}`}
+            style={{
+              top: "top" in dot ? dot.top : undefined,
+              bottom: "bottom" in dot ? dot.bottom : undefined,
+              left: "left" in dot ? dot.left : undefined,
+              right: "right" in dot ? dot.right : undefined,
+              animationDelay: dot.delay,
+            }}
+          />
+        ))}
         {desktopHeroDots.map((dot, i) => (
           <div
             key={i}
-            className={`absolute hidden xl:block rounded-full ${dot.size} ${dot.color} ${dot.anim}`}
+            className={`absolute hidden xl:block rounded-full pointer-events-none ${dot.size} ${dot.color} ${dot.anim}`}
             style={{
               top: "top" in dot ? dot.top : undefined,
               bottom: "bottom" in dot ? dot.bottom : undefined,
@@ -109,38 +162,38 @@ export function LandingPage() {
         <div className="absolute bottom-8 left-8 hidden sm:block w-16 h-16 border-b border-l border-primary/10 rounded-bl-lg" />
         <div className="absolute bottom-8 right-8 hidden sm:block w-16 h-16 border-b border-r border-primary/10 rounded-br-lg" />
 
-        <div className="relative z-10 min-h-screen max-w-2xl mx-auto w-full flex flex-col">
-          <div className="flex-1 flex items-center justify-center text-center">
-            <div className="w-full">
-              {/* Ornament */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.2 }}
-                className="mb-10 flex justify-center max-sm:translate-x-0 sm:-translate-x-2"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="block w-12 h-px bg-gradient-to-r from-transparent to-primary/40" />
+        <div className="relative z-10 min-h-screen max-w-6xl dark:max-w-2xl mx-auto w-full flex flex-col">
+          <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:gap-10 xl:gap-14 dark:lg:flex-col dark:items-center dark:justify-center">
+            <div className="hero-mobile-copy flex-1 flex flex-col justify-center max-lg:justify-start max-lg:pt-[5.25rem] max-lg:pb-[min(46vh,25rem)] dark:max-lg:justify-center dark:max-lg:pt-0 dark:max-lg:pb-0 text-center lg:text-left lg:py-12 dark:lg:text-center dark:lg:py-0 dark:w-full">
+              <div className="inline-block w-fit mx-auto lg:mx-0 dark:lg:mx-auto">
+                {/* Ornament — spans title width */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2 }}
+                  className="mb-10 max-lg:mb-4 flex w-full items-center gap-3"
+                >
+                  <span className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
                   <span className="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0">
                     <Heart className="w-full h-full text-primary/60" strokeWidth={1.75} />
                   </span>
-                  <span className="block w-12 h-px bg-gradient-to-l from-transparent to-primary/40" />
-                </div>
-              </motion.div>
+                  <span className="flex-1 h-px bg-gradient-to-r from-primary/40 to-transparent" />
+                </motion.div>
 
-              {/* Title */}
-              <motion.h1
-                className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-shadow-warm"
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
-                <span className="text-gradient-warm">StillHere</span>
-              </motion.h1>
+                {/* Title */}
+                <motion.h1
+                  className="hero-mobile-title font-serif text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl font-bold tracking-tight mb-6 text-shadow-warm"
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
+                >
+                  <span className="text-gradient-warm">StillHere</span>
+                </motion.h1>
+              </div>
 
               {/* Subtitle */}
               <motion.p
-                className="hero-subline mb-4 max-w-xl mx-auto"
+                className="hero-subline mb-4 max-w-xl mx-auto lg:mx-0 dark:lg:mx-auto"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35, duration: 0.8 }}
@@ -149,7 +202,7 @@ export function LandingPage() {
               </motion.p>
 
               <motion.p
-                className="text-sm text-muted-foreground/60 mb-12 max-w-md mx-auto leading-relaxed"
+                className="hero-mobile-desc text-sm text-muted-foreground/60 mb-10 lg:mb-12 dark:lg:mb-12 max-w-md mx-auto lg:mx-0 dark:lg:mx-auto leading-relaxed"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45, duration: 0.8 }}
@@ -159,7 +212,7 @@ export function LandingPage() {
 
               {/* CTA Buttons */}
               <motion.div
-                className="flex flex-col sm:flex-row gap-3 justify-center"
+                className="hero-mobile-ctas flex flex-col sm:flex-row gap-3 justify-center lg:justify-start dark:lg:justify-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.55, duration: 0.8 }}
@@ -169,9 +222,8 @@ export function LandingPage() {
                   onClick={handleCreate}
                   className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg max-sm:shadow-md max-sm:shadow-primary/10 sm:btn-glow sm:glow-strong"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
+                  <BookHeart className="w-4 h-4 mr-2" />
                   Create a Memorial
-                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
                 <Button
                   variant="outline"
@@ -184,23 +236,74 @@ export function LandingPage() {
                 </Button>
               </motion.div>
             </div>
+
+            <motion.div
+              className="hidden lg:flex justify-center lg:justify-end shrink-0 lg:mt-0 lg:translate-y-6 dark:hidden"
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <div className="relative flex items-center gap-2 sm:gap-3 lg:gap-6 xl:gap-7">
+                <Link
+                  href="/memorial/margaret-osullivan-1942-2024"
+                  aria-label="Scan or click to view the memorial demo"
+                  className="group/qr relative z-10 shrink-0 flex flex-col items-center gap-2 cursor-pointer"
+                >
+                  <div className="rounded-lg bg-card border border-border/50 shadow-soft p-2.5 sm:p-3 transition-all duration-300 group-hover/qr:border-primary/30 group-hover/qr:shadow-elevated group-hover/qr:-translate-y-0.5">
+                    <Image
+                      src="/qrmockup.png"
+                      alt=""
+                      width={512}
+                      height={512}
+                      className="w-[80px] sm:w-[92px] lg:w-[88px] xl:w-[96px] h-auto"
+                    />
+                  </div>
+                  <div className="text-center max-w-[100px] sm:max-w-[112px]">
+                    <p className="inline-flex items-center justify-center gap-1 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground/65 font-medium leading-none">
+                      <ScanLine className="w-3 h-3 shrink-0" strokeWidth={2} />
+                      Scan or click
+                    </p>
+                  </div>
+                </Link>
+
+                <div
+                  className="flex flex-col items-center justify-center shrink-0 self-center gap-1.5 px-0.5 sm:px-1"
+                  aria-hidden="true"
+                >
+                  <div className="flex items-center gap-1 text-primary/40">
+                    <span className="w-3 sm:w-4 h-px bg-gradient-to-r from-transparent to-primary/35" />
+                    <ArrowRight className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0" strokeWidth={1.75} />
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground/50 text-center leading-tight max-w-[56px]">
+                    Opens on phone
+                  </p>
+                </div>
+
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                  className="relative z-10 shrink-0 w-full max-w-[200px] sm:max-w-[220px] lg:max-w-[200px] xl:max-w-[220px]"
+                >
+                  <Image
+                    src="/mockup.png"
+                    alt="StillHere memorial page for Margaret Lane shown on an iPhone"
+                    width={979}
+                    height={1964}
+                    className="relative w-full h-auto"
+                    priority
+                  />
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
 
-          {/* Scroll indicator — same column as heart */}
-          <div className="shrink-0 pb-8 flex justify-center">
+          {/* Scroll indicator — desktop only */}
+          <div className="hidden sm:flex shrink-0 pb-8 justify-center">
             <motion.div
-              className="sm:hidden"
-              animate={{ y: [0, 6, 0] }}
-              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-            >
-              <ChevronDown className="w-6 h-6 text-muted-foreground/40" strokeWidth={1.75} />
-            </motion.div>
-            <motion.div
-              className="hidden sm:block"
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
             >
-              <div className="box-border w-6 h-9 rounded-full border border-muted-foreground/20 flex flex-col items-center pt-1.5">
+              <div className="box-border w-6 h-9 rounded-full border border-muted-foreground/40 dark:border-muted-foreground/20 flex flex-col items-center pt-1.5">
                 <motion.div
                   className="w-1 h-1.5 rounded-full bg-primary/50"
                   animate={{ opacity: [0.3, 1, 0.3] }}
@@ -210,6 +313,36 @@ export function LandingPage() {
             </motion.div>
           </div>
         </div>
+
+        <motion.div
+          className="lg:hidden absolute bottom-0 left-0 right-0 z-10 flex flex-col items-center dark:hidden -mb-px"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <div className="hero-mobile-chevron mb-1 pointer-events-none" aria-hidden="true">
+            <motion.div
+              animate={{ y: [0, 4, 0] }}
+              transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+            >
+              <ChevronDown className="w-4 h-4 text-muted-foreground/40" strokeWidth={1.75} />
+            </motion.div>
+          </div>
+          <Link
+            href="/memorial/margaret-osullivan-1942-2024"
+            aria-label="View the memorial demo"
+            className="group/mobile-demo block w-full max-lg:w-auto max-w-[min(100%,30rem)] mx-auto cursor-pointer leading-none active:scale-[0.98] transition-transform duration-200"
+          >
+            <Image
+              src="/mockupmobilenoshadow.png"
+              alt=""
+              width={2300}
+              height={2400}
+              className="block w-full h-auto hero-mobile-mockup-img transition-[filter] duration-300 group-hover/mobile-demo:brightness-[1.03] group-active/mobile-demo:brightness-[0.97]"
+              priority
+            />
+          </Link>
+        </motion.div>
       </section>
 
       {/* ── Features ── */}
@@ -232,32 +365,7 @@ export function LandingPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {[
-              {
-                icon: Flame,
-                title: "Lasting Tributes",
-                description: "Leave candles, flowers, and heartfelt messages that family and friends can see and add to.",
-                color: "text-candle",
-                bg: "bg-candle/[0.08]",
-                darkBorder: "dark:border-candle/15",
-              },
-              {
-                icon: Image,
-                title: "Share Memories",
-                description: "Upload photos, add life events to a timeline, embed videos, and write their story in a beautiful biography.",
-                color: "text-primary",
-                bg: "bg-primary/[0.08]",
-                darkBorder: "dark:border-primary/15",
-              },
-              {
-                icon: Share2,
-                title: "Easy Sharing",
-                description: "Generate QR codes for printed materials. Share instantly via WhatsApp, Facebook, or a simple link.",
-                color: "text-sage",
-                bg: "bg-sage/10",
-                darkBorder: "dark:border-sage/20",
-              },
-            ].map((feature, i) => (
+            {memoryAliveFeatures.map((feature, i) => (
               <motion.div
                 key={feature.title}
                 initial="hidden"
@@ -266,9 +374,9 @@ export function LandingPage() {
                 variants={fadeUp}
                 custom={i + 2}
               >
-                <div className={`bg-card border border-border shadow-soft ${feature.darkBorder} rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group select-none hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none`}>
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${feature.bg} mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                <div className="bg-card border border-border shadow-soft dark:border-primary/15 rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group select-none hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/[0.08] mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <feature.icon className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="font-serif text-xl sm:text-2xl font-semibold mb-3">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{feature.description}</p>
@@ -427,7 +535,7 @@ export function LandingPage() {
             >
               {[
                 { icon: Clock, label: "Life Timeline" },
-                { icon: Image, label: "Photo Gallery" },
+                { icon: ImageIcon, label: "Photo Gallery" },
                 { icon: Music, label: "Favourite Song" },
                 { icon: Flower2, label: "Flower Tributes" },
                 { icon: Flame, label: "Candle Tributes" },
@@ -449,7 +557,7 @@ export function LandingPage() {
                 onClick={handleCreate}
                 className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg max-sm:shadow-md max-sm:shadow-primary/10 sm:btn-glow sm:glow-strong"
               >
-                <Sparkles className="w-4 h-4 mr-2" />
+                <BookHeart className="w-4 h-4 mr-2" />
                 Get Started — It&apos;s Free
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>

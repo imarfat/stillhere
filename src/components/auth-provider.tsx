@@ -7,7 +7,7 @@ import { type ReactNode } from "react"
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <NextAuthSessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         {children}
       </ThemeProvider>
     </NextAuthSessionProvider>

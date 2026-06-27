@@ -194,7 +194,7 @@ export function CoverHeroPreview({
       </p>
 
       <Dialog open={expanded} onOpenChange={setExpanded}>
-        <DialogContent className="flex flex-col items-center border-border/50 p-4 sm:p-6 gap-3 w-auto max-w-[calc(100vw-2rem)]">
+        <DialogContent showCloseButton={false} className="flex flex-col items-center border-border/50 p-4 sm:p-6 gap-3 w-auto max-w-[calc(100vw-2rem)]">
           <DialogTitle className="font-serif text-lg text-center self-stretch">
             Memorial preview
           </DialogTitle>

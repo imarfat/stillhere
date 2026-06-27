@@ -1050,7 +1050,12 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
                             <p className="text-sm font-medium">{entry.visitorName}</p>
                             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{entry.message}</p>
                             <div className="flex gap-2 mt-2">
-                              <Button size="sm" variant="outline" onClick={() => handleApproveEntry(entry.id)} className="text-accent hover:text-accent">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleApproveEntry(entry.id)}
+                                className="border-chart-2/50 text-chart-2 hover:bg-chart-2/10 hover:border-chart-2/70 dark:hover:bg-chart-2/15"
+                              >
                                 <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                                 Approve
                               </Button>
@@ -1070,7 +1075,7 @@ export function EditMemorialPage({ memorialId }: { memorialId: string }) {
                   {/* Published */}
                   <div>
                     <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-accent" />
+                      <CheckCircle2 className="w-4 h-4 text-chart-2" />
                       Published ({publishedCount})
                     </h4>
                     {publishedCount === 0 ? (
