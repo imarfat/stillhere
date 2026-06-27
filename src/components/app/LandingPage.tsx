@@ -8,7 +8,9 @@ import { useNavigation } from "@/lib/store"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
+import { toast } from "sonner"
 import { HeroLineArt } from "@/components/app/HeroLineArt"
+import { DARK_MODE_ENABLED, DARK_MODE_DISABLED_MESSAGE } from "@/lib/theme-config"
 import { Heart, Flame, Flower2, Share2, Image as ImageIcon, Music, Clock, ArrowRight, Sun, Moon, BookHeart, Feather, Quote, Star, ScanLine } from "lucide-react"
 
 const fadeUp: Variants = {
@@ -100,6 +102,14 @@ export function LandingPage() {
   }
 
   const handleToggleTheme = () => {
+    if (!DARK_MODE_ENABLED) {
+      if (resolvedTheme === "dark") {
+        setTheme("light")
+      } else {
+        toast.info(DARK_MODE_DISABLED_MESSAGE)
+      }
+      return
+    }
     setTheme(resolvedTheme === "dark" ? "light" : "dark")
   }
 
@@ -162,7 +172,7 @@ export function LandingPage() {
         <div className="absolute bottom-8 left-8 hidden sm:block w-16 h-16 border-b border-l border-primary/10 rounded-bl-lg" />
         <div className="absolute bottom-8 right-8 hidden sm:block w-16 h-16 border-b border-r border-primary/10 rounded-br-lg" />
 
-        <div className="relative z-10 min-h-screen max-w-6xl dark:max-w-2xl mx-auto w-full flex flex-col">
+        <div className="hero-section-inner relative z-10 min-h-screen max-w-6xl dark:max-w-2xl mx-auto w-full flex flex-col">
           <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:gap-10 xl:gap-14 dark:lg:flex-col dark:items-center dark:justify-center">
             <div className="hero-mobile-copy flex-1 flex flex-col justify-center max-lg:justify-start max-lg:pt-[5.25rem] dark:max-lg:justify-center dark:max-lg:pt-0 dark:max-lg:pb-0 text-center lg:text-left lg:py-12 dark:lg:text-center dark:lg:py-0 dark:w-full">
               <div className="inline-block w-fit mx-auto lg:mx-0 dark:lg:mx-auto">
@@ -171,7 +181,7 @@ export function LandingPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 1.2 }}
-                  className="mb-10 max-lg:mb-4 flex w-full items-center gap-3"
+                  className="hero-mobile-ornament mb-10 max-lg:mb-4 flex w-full items-center gap-3"
                 >
                   <span className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
                   <span className="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0">

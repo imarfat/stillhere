@@ -18,7 +18,7 @@ import {
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  Plus, LogOut, MessageSquare, Image as ImageIcon, Calendar, Flame,
+  BookHeart, LogOut, MessageSquare, Image as ImageIcon, Calendar, Flame,
   ArrowRight, Search, Eye, Sparkles, Settings, SortDesc,
 } from "lucide-react"
 import { AuthFloatingDots } from "@/components/app/AuthFloatingDots"
@@ -237,7 +237,7 @@ export function DashboardPage() {
               onClick={() => navigate({ page: "create-memorial" })}
               className="hidden sm:inline-flex bg-primary text-primary-foreground hover:opacity-90 rounded-full px-5 h-10 shadow-md shadow-primary/15 btn-glow self-start sm:self-auto"
             >
-              <Sparkles className="w-4 h-4 mr-1.5" />
+              <BookHeart className="w-4 h-4 mr-1.5" />
               New Memorial
             </Button>
           </div>
@@ -403,7 +403,7 @@ export function DashboardPage() {
                     onClick={() => navigate({ page: "create-memorial" })}
                     className="w-full rounded-xl h-11 bg-primary text-primary-foreground hover:opacity-90 shadow-md shadow-primary/20 btn-glow"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <BookHeart className="w-4 h-4 mr-2" />
                     New Memorial
                   </Button>
                 </div>
