@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
 import { HeroLineArt } from "@/components/app/HeroLineArt"
-import { Heart, Flame, Flower2, Share2, Image as ImageIcon, Music, Clock, ArrowRight, Sun, Moon, BookHeart, Feather, Quote, Star, ScanLine, ChevronDown } from "lucide-react"
+import { Heart, Flame, Flower2, Share2, Image as ImageIcon, Music, Clock, ArrowRight, Sun, Moon, BookHeart, Feather, Quote, Star, ScanLine } from "lucide-react"
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -164,7 +164,7 @@ export function LandingPage() {
 
         <div className="relative z-10 min-h-screen max-w-6xl dark:max-w-2xl mx-auto w-full flex flex-col">
           <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:gap-10 xl:gap-14 dark:lg:flex-col dark:items-center dark:justify-center">
-            <div className="hero-mobile-copy flex-1 flex flex-col justify-center max-lg:justify-start max-lg:pt-[5.25rem] max-lg:pb-[min(46vh,25rem)] dark:max-lg:justify-center dark:max-lg:pt-0 dark:max-lg:pb-0 text-center lg:text-left lg:py-12 dark:lg:text-center dark:lg:py-0 dark:w-full">
+            <div className="hero-mobile-copy flex-1 flex flex-col justify-center max-lg:justify-start max-lg:pt-[5.25rem] dark:max-lg:justify-center dark:max-lg:pt-0 dark:max-lg:pb-0 text-center lg:text-left lg:py-12 dark:lg:text-center dark:lg:py-0 dark:w-full">
               <div className="inline-block w-fit mx-auto lg:mx-0 dark:lg:mx-auto">
                 {/* Ornament — spans title width */}
                 <motion.div
@@ -320,18 +320,10 @@ export function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          <div className="hero-mobile-chevron mb-1 pointer-events-none" aria-hidden="true">
-            <motion.div
-              animate={{ y: [0, 4, 0] }}
-              transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-            >
-              <ChevronDown className="w-4 h-4 text-muted-foreground/40" strokeWidth={1.75} />
-            </motion.div>
-          </div>
           <Link
             href="/memorial/margaret-osullivan-1942-2024"
             aria-label="View the memorial demo"
-            className="group/mobile-demo block w-full max-lg:w-auto max-w-[min(100%,30rem)] mx-auto cursor-pointer leading-none active:scale-[0.98] transition-transform duration-200"
+            className="group/mobile-demo block w-full max-lg:w-auto max-w-[min(100%,36rem)] mx-auto cursor-pointer leading-none active:scale-[0.98] transition-transform duration-200"
           >
             <Image
               src="/mockupmobilenoshadow.png"

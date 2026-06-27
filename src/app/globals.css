@@ -611,6 +611,7 @@
   @media (max-height: 680px) and (max-width: 1023px) {
     .hero-mobile-copy {
       padding-top: 3.75rem;
+      padding-bottom: 18.5rem;
     }
     .hero-mobile-copy .hero-mobile-title {
       margin-bottom: 1rem;
@@ -619,19 +620,22 @@
       margin-bottom: 1.5rem;
     }
     .hero-mobile-mockup-img {
-      max-height: min(36vh, 15rem);
+      max-height: 18rem;
       width: auto;
-      max-width: min(100%, 20rem);
+      max-width: min(100%, 24rem);
       margin-inline: auto;
     }
   }
 
-  /* Medium & tall phones — size mockup to available space below hero copy */
+  /* Medium & tall phones — fixed mockup size (no vh/dvh — avoids resize on scroll) */
   @media (min-height: 681px) and (max-width: 1023px) {
+    .hero-mobile-copy {
+      padding-bottom: 28rem;
+    }
     .hero-mobile-mockup-img {
-      max-height: min(46vh, calc(100dvh - 30.5rem));
+      max-height: 28rem;
       width: auto;
-      max-width: min(100%, 30rem);
+      max-width: min(100%, 36rem);
       margin-inline: auto;
     }
   }
