@@ -3,15 +3,20 @@
 import { useState, useEffect } from "react"
 import { motion, type Variants } from "framer-motion"
 import { useSession } from "next-auth/react"
-import { useTheme } from "next-themes"
 import { useNavigation } from "@/lib/store"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { toast } from "sonner"
 import { HeroLineArt } from "@/components/app/HeroLineArt"
-import { DARK_MODE_ENABLED, DARK_MODE_DISABLED_MESSAGE } from "@/lib/theme-config"
-import { Heart, Flame, Flower2, Share2, Image as ImageIcon, Music, Clock, ArrowRight, Sun, Moon, BookHeart, Feather, Quote, Star, ScanLine } from "lucide-react"
+import { LandingNav } from "@/components/app/landing/LandingNav"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel"
+import { cn } from "@/lib/utils"
+import { Heart, Flame, Flower2, Share2, Image as ImageIcon, Music, Clock, ArrowRight, BookHeart, Feather, Quote, Star, ScanLine, type LucideIcon } from "lucide-react"
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -56,19 +61,48 @@ const memoryAliveFeatures = [
   {
     icon: Flame,
     title: "Lasting Tributes",
+    highlight: "Candles & flowers",
     description: "Leave candles, flowers, and heartfelt messages that family and friends can see and add to.",
+    mobileDetail: "Each tribute becomes part of a living collection that grows as more people visit and share their love.",
   },
   {
     icon: ImageIcon,
     title: "Share Memories",
+    highlight: "Photos & video",
     description: "Upload photos, add life events to a timeline, embed videos, and write their story in a beautiful biography.",
+    mobileDetail: "Organise photos into albums, highlight the moments that mattered most, and tell their story in your own words.",
   },
   {
-    icon: Share2,
+    icon: Clock,
+    title: "Life Timeline",
+    highlight: "Milestones",
+    description: "Chronicle their journey with dated moments: graduations, weddings, adventures, and cherished family memories.",
+    mobileDetail: "Build a visual journey from childhood through every chapter that shaped who they became.",
+  },
+  {
+    icon: Music,
+    title: "Music & Voice",
+    highlight: "Their soundtrack",
+    description: "Set a favourite song, add playlists, or include voice recordings that capture who they were.",
+    mobileDetail: "Whether it's a wedding song or a recorded message, sound can bring their presence back in an instant.",
+  },
+  {
+    icon: Flower2,
+    title: "Guest Messages",
+    highlight: "From everyone",
+    description: "Invite family and friends to sign the guestbook with stories, condolences, and photos from anywhere in the world.",
+    mobileDetail: "Distance doesn't matter. Loved ones can contribute from any device, any time.",
+  },
+  {
+    icon: ScanLine,
     title: "Easy Sharing",
-    description: "Generate QR codes for printed materials. Share instantly via WhatsApp, Facebook, or a simple link.",
+    highlight: "Link & QR code",
+    description: "Generate QR codes for printed materials. Share memorials instantly via social media or a simple link.",
+    mobileDetail: "Print a QR code for programs and keepsakes, or send a link in a group chat in seconds.",
   },
 ] as const
+
+type MemoryAliveFeature = (typeof memoryAliveFeatures)[number]
 
 const desktopHeroDots = [
   { top: "10%", left: "18%", size: "w-0.5 h-0.5", color: "bg-primary/20", anim: "animate-float-slow", delay: "0.4s" },
@@ -83,10 +117,190 @@ const desktopHeroDots = [
   { bottom: "18%", right: "28%", size: "w-1 h-1", color: "bg-primary/25", anim: "animate-float-slow", delay: "0.6s" },
 ] as const
 
+type Testimonial = {
+  quote: string
+  name: string
+  role: string
+  icon: LucideIcon
+}
+
+const testimonials: Testimonial[] = [
+  {
+    quote: "StillHere gave us a beautiful space to remember Mom. The tributes from family around the world brought us so much comfort during a difficult time.",
+    name: "Sarah M.",
+    role: "Daughter",
+    icon: Heart,
+  },
+  {
+    quote: "I created a memorial for my best friend. Seeing the candles and flowers from people who loved him makes me feel like his memory will truly live on.",
+    name: "James L.",
+    role: "Friend",
+    icon: Flame,
+  },
+  {
+    quote: "The QR code feature is wonderful. We placed it on the service program and now everyone can revisit the memorial and share their own memories.",
+    name: "Maria K.",
+    role: "Granddaughter",
+    icon: Star,
+  },
+]
+
+function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+  const Icon = testimonial.icon
+
+  return (
+    <div className="bg-card border border-border shadow-soft rounded-2xl p-6 sm:p-8 h-full flex flex-col transition-all duration-500 group relative hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none select-none">
+      <Quote className="absolute top-6 right-6 w-8 h-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
+      <div className="flex items-center gap-1 mb-4">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <Star key={s} className="w-3.5 h-3.5 fill-primary/80 text-primary/80" />
+        ))}
+      </div>
+      <p className="text-sm sm:text-base leading-relaxed text-muted-foreground mb-6 relative z-10 flex-1">
+        &ldquo;{testimonial.quote}&rdquo;
+      </p>
+      <div className="flex items-center gap-3 mt-auto">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <Icon className="w-4 h-4 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold">{testimonial.name}</p>
+          <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MobileDotCarousel({
+  ariaLabel,
+  children,
+}: {
+  ariaLabel: string
+  children: React.ReactNode
+}) {
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const [slideCount, setSlideCount] = useState(0)
+
+  useEffect(() => {
+    if (!api) return
+
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap())
+      setSlideCount(api.scrollSnapList().length)
+    }
+
+    onSelect()
+    api.on("select", onSelect)
+    api.on("reInit", onSelect)
+
+    return () => {
+      api.off("select", onSelect)
+      api.off("reInit", onSelect)
+    }
+  }, [api])
+
+  return (
+    <div className="md:hidden">
+      <Carousel setApi={setApi} opts={{ loop: true, align: "center" }} className="w-full">
+        {children}
+      </Carousel>
+      <div className="flex justify-center gap-2 mt-6" role="tablist" aria-label={ariaLabel}>
+        {Array.from({ length: slideCount }, (_, i) => (
+          <button
+            key={i}
+            type="button"
+            role="tab"
+            aria-selected={i === current}
+            aria-label={`Slide ${i + 1} of ${slideCount}`}
+            onClick={() => api?.scrollTo(i)}
+            className={cn(
+              "h-2 rounded-full transition-all duration-300",
+              i === current ? "w-5 bg-primary" : "w-2 bg-primary/25"
+            )}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function MemoryAliveCard({ feature, index }: { feature: MemoryAliveFeature; index: number }) {
+  const Icon = feature.icon
+
+  return (
+    <div className="relative bg-card border border-border shadow-soft dark:border-primary/15 rounded-2xl p-8 md:p-8 h-full flex flex-col overflow-hidden transition-all duration-500 group select-none hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none">
+      <span
+        aria-hidden="true"
+        className="absolute top-5 right-5 font-serif text-5xl font-bold text-primary/[0.07] select-none leading-none"
+      >
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/[0.08] mb-5 group-hover:scale-110 transition-transform duration-300">
+        <Icon className="w-6 h-6 text-primary" />
+      </div>
+      <span className="inline-flex w-fit text-[0.65rem] font-semibold tracking-[0.14em] uppercase text-primary/80 bg-primary/10 px-2.5 py-1 rounded-full mb-4">
+        {feature.highlight}
+      </span>
+      <h3 className="font-serif text-2xl md:text-2xl font-semibold mb-3">{feature.title}</h3>
+      <p className="text-muted-foreground text-base md:text-base leading-relaxed">{feature.description}</p>
+      <p className="md:hidden text-muted-foreground/75 text-sm leading-relaxed mt-3">
+        {feature.mobileDetail}
+      </p>
+    </div>
+  )
+}
+
+function MemoryAliveMobileCarousel({ items }: { items: readonly MemoryAliveFeature[] }) {
+  return (
+    <motion.div
+      className="md:hidden pb-2"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-40px" }}
+      variants={fadeUp}
+      custom={1}
+    >
+      <MobileDotCarousel ariaLabel="Features">
+        <CarouselContent className="-ml-3 items-stretch">
+          {items.map((feature, i) => (
+            <CarouselItem key={feature.title} className="pl-3 basis-[88%] sm:basis-[85%] flex">
+              <MemoryAliveCard feature={feature} index={i} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </MobileDotCarousel>
+    </motion.div>
+  )
+}
+
+function TestimonialsMobileCarousel({ items }: { items: Testimonial[] }) {
+  return (
+    <motion.div
+      className="md:hidden"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-40px" }}
+      variants={fadeUp}
+      custom={2}
+    >
+      <MobileDotCarousel ariaLabel="Testimonials">
+        <CarouselContent className="-ml-3">
+          {items.map((testimonial) => (
+            <CarouselItem key={testimonial.name} className="pl-3 basis-[88%] sm:basis-[85%]">
+              <TestimonialCard testimonial={testimonial} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </MobileDotCarousel>
+    </motion.div>
+  )
+}
+
 export function LandingPage() {
   const { data: session, status } = useSession()
   const { navigate } = useNavigation()
-  const { setTheme, resolvedTheme } = useTheme()
 
   useEffect(() => {
     if (status === "authenticated") navigate({ page: "dashboard" })
@@ -97,34 +311,18 @@ export function LandingPage() {
     else navigate({ page: "login" })
   }
 
+  const handleGetStarted = () => {
+    if (session) navigate({ page: "dashboard" })
+    else navigate({ page: "signup" })
+  }
+
   const handleLearnMore = () => {
     document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const handleToggleTheme = () => {
-    if (!DARK_MODE_ENABLED) {
-      if (resolvedTheme === "dark") {
-        setTheme("light")
-      } else {
-        toast.info(DARK_MODE_DISABLED_MESSAGE)
-      }
-      return
-    }
-    setTheme(resolvedTheme === "dark" ? "light" : "dark")
-  }
-
   return (
     <div className="flex flex-col min-h-screen relative select-none">
-      {/* Theme toggle - fixed */}
-      {resolvedTheme && (
-        <button
-          onClick={handleToggleTheme}
-          className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full bg-card/90 backdrop-blur-md border border-border/60 flex items-center justify-center hover:bg-card hover:shadow-soft transition-all shadow-soft"
-          aria-label="Toggle theme"
-        >
-          {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-amber-light" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
-        </button>
-      )}
+      <LandingNav />
 
       {/* ── Hero ── */}
       <section className="hero-section relative min-h-screen px-6 overflow-hidden">
@@ -172,16 +370,16 @@ export function LandingPage() {
         <div className="absolute bottom-8 left-8 hidden sm:block w-16 h-16 border-b border-l border-primary/10 rounded-bl-lg" />
         <div className="absolute bottom-8 right-8 hidden sm:block w-16 h-16 border-b border-r border-primary/10 rounded-br-lg" />
 
-        <div className="hero-section-inner relative z-10 min-h-screen max-w-6xl dark:max-w-2xl mx-auto w-full flex flex-col">
-          <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:gap-10 xl:gap-14 dark:lg:flex-col dark:items-center dark:justify-center">
-            <div className="hero-mobile-copy flex-1 flex flex-col justify-center max-lg:justify-start max-lg:pt-[5.25rem] dark:max-lg:justify-center dark:max-lg:pt-0 dark:max-lg:pb-0 text-center lg:text-left lg:py-12 dark:lg:text-center dark:lg:py-0 dark:w-full">
-              <div className="inline-block w-fit mx-auto lg:mx-0 dark:lg:mx-auto">
-                {/* Ornament — spans title width */}
+        <div className="hero-section-inner relative z-10 min-h-screen max-w-6xl dark:max-w-2xl mx-auto w-full flex flex-col max-xl:pointer-events-none">
+          <div className="flex-1 flex flex-col xl:flex-row xl:items-center xl:gap-10 2xl:gap-14 dark:xl:flex-col dark:items-center dark:justify-center">
+            <div className="hero-mobile-copy flex-1 flex flex-col justify-center max-xl:justify-start max-xl:pt-[calc(8rem+env(safe-area-inset-top))] dark:max-xl:justify-center dark:max-xl:pt-0 dark:max-xl:pb-0 text-center xl:text-left md:max-w-2xl md:mx-auto xl:max-w-none xl:mx-0 xl:py-12 dark:xl:text-center dark:xl:py-0 dark:w-full">
+              <div className="inline-block w-fit mx-auto xl:mx-0 dark:xl:mx-auto max-xl:w-full">
+                {/* Ornament — desktop only, spans title width */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 1.2 }}
-                  className="hero-mobile-ornament mb-10 max-lg:mb-4 flex w-full items-center gap-3"
+                  className="hero-mobile-ornament mb-10 max-xl:hidden flex w-full items-center gap-3"
                 >
                   <span className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/40" />
                   <span className="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0">
@@ -190,9 +388,8 @@ export function LandingPage() {
                   <span className="flex-1 h-px bg-gradient-to-r from-primary/40 to-transparent" />
                 </motion.div>
 
-                {/* Title */}
                 <motion.h1
-                  className="hero-mobile-title font-serif text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl font-bold tracking-tight mb-6 text-shadow-warm"
+                  className="hero-mobile-title font-serif text-5xl sm:text-6xl md:text-7xl xl:text-7xl 2xl:text-8xl font-bold tracking-tight mb-6 max-xl:mb-2 text-shadow-warm"
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -201,54 +398,126 @@ export function LandingPage() {
                 </motion.h1>
               </div>
 
-              {/* Subtitle */}
-              <motion.p
-                className="hero-subline mb-4 max-w-xl mx-auto lg:mx-0 dark:lg:mx-auto"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35, duration: 0.8 }}
-              >
-                Beautiful digital memorials for those you love
-              </motion.p>
+              <div className="w-full max-xl:max-w-md max-xl:mx-auto md:max-w-none flex flex-col">
+                <div className="hero-mobile-message flex flex-col max-xl:gap-5 mb-10 max-xl:mb-5 xl:mb-12">
+                  <motion.p
+                    className="hero-subline mb-4 max-xl:mb-0 max-w-md mx-auto xl:mx-0 dark:xl:mx-auto"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35, duration: 0.8 }}
+                  >
+                    Beautiful digital memorials for those you love
+                  </motion.p>
 
-              <motion.p
-                className="hero-mobile-desc text-sm text-muted-foreground/60 mb-10 lg:mb-12 dark:lg:mb-12 max-w-md mx-auto lg:mx-0 dark:lg:mx-auto leading-relaxed"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45, duration: 0.8 }}
-              >
-                Create a lasting tribute with photos, stories, music, and messages from family and friends. Share it with anyone through a simple link.
-              </motion.p>
+                  <motion.div
+                    className="hero-mobile-desc max-xl:rounded-2xl max-xl:border max-xl:border-border/40 max-xl:bg-muted/20 max-xl:px-4 max-xl:py-3.5 max-w-md mx-auto xl:mx-0 dark:xl:mx-auto text-sm md:text-base xl:rounded-none xl:border-0 xl:bg-transparent xl:p-0"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.45, duration: 0.8 }}
+                  >
+                    <p className="text-muted-foreground/60 leading-relaxed">
+                      Create a lasting tribute with photos, stories, music, and messages from family and friends.
+                      Share it with anyone through a simple link.
+                    </p>
+                  </motion.div>
+                </div>
 
-              {/* CTA Buttons */}
-              <motion.div
-                className="hero-mobile-ctas flex flex-col sm:flex-row gap-3 justify-center lg:justify-start dark:lg:justify-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55, duration: 0.8 }}
-              >
-                <Button
-                  size="lg"
-                  onClick={handleCreate}
-                  className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg max-sm:shadow-md max-sm:shadow-primary/10 sm:btn-glow sm:glow-strong"
+                {/* CTA Buttons */}
+                <motion.div
+                  className="hero-mobile-ctas pointer-events-auto flex flex-col sm:flex-row gap-3 justify-center xl:justify-start dark:xl:justify-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.55, duration: 0.8 }}
                 >
-                  <BookHeart className="w-4 h-4 mr-2" />
-                  Create a Memorial
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handleLearnMore}
-                  className="px-8 h-12 text-base rounded-full border-border/40 hover:bg-muted/50 hover:border-primary/20 transition-all"
+                  <Button
+                    size="lg"
+                    onClick={handleCreate}
+                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg max-sm:shadow-md max-sm:shadow-primary/10 sm:btn-glow sm:glow-strong"
+                  >
+                    <BookHeart className="w-4 h-4 mr-2" />
+                    Create a Memorial
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleLearnMore}
+                    className="w-full sm:w-auto px-8 h-12 text-base rounded-full border-border/40 hover:bg-muted/50 hover:border-primary/20 transition-all"
+                  >
+                    <Feather className="w-4 h-4 mr-2" />
+                    Learn More
+                  </Button>
+                </motion.div>
+
+                <motion.div
+                  className="hero-tablet-desktop-mockup pointer-events-auto hidden md:flex xl:hidden justify-center mt-14 lg:mt-20 dark:hidden"
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
-                  <Feather className="w-4 h-4 mr-2" />
-                  Learn More
-                </Button>
-              </motion.div>
+                  <div className="relative flex items-center gap-8 lg:gap-12">
+                    <Link
+                      href="/memorial/margaret-osullivan-1942-2024"
+                      aria-label="Scan or click to view the memorial demo"
+                      className="group/qr relative z-10 shrink-0 flex flex-col items-center gap-2 cursor-pointer"
+                    >
+                      <div className="rounded-lg bg-card border border-border/50 shadow-soft p-2 sm:p-2.5 transition-all duration-300 group-hover/qr:border-primary/30 group-hover/qr:shadow-elevated group-hover/qr:-translate-y-0.5">
+                        <Image
+                          src="/qrmockup.png"
+                          alt=""
+                          width={512}
+                          height={512}
+                          className="w-[68px] sm:w-[76px] h-auto"
+                        />
+                      </div>
+                      <div className="text-center max-w-[100px] sm:max-w-[112px]">
+                        <p className="inline-flex items-center justify-center gap-1 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground/65 font-medium leading-none">
+                          <ScanLine className="w-3 h-3 shrink-0" strokeWidth={2} />
+                          Scan or click
+                        </p>
+                      </div>
+                    </Link>
+
+                    <div
+                      className="flex flex-col items-center justify-center shrink-0 self-center gap-1.5 px-2 sm:px-3"
+                      aria-hidden="true"
+                    >
+                      <div className="flex items-center gap-1.5 text-primary/40">
+                        <span className="w-6 sm:w-8 h-px bg-gradient-to-r from-transparent to-primary/35" />
+                        <ArrowRight className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+                        <span className="w-6 sm:w-8 h-px bg-gradient-to-l from-transparent to-primary/35" />
+                      </div>
+                      <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground/50 text-center leading-tight max-w-[56px]">
+                        Opens on phone
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/memorial/margaret-osullivan-1942-2024"
+                      aria-label="View the memorial demo"
+                      className="group/tablet-demo block cursor-pointer active:scale-[0.98] transition-transform duration-200"
+                    >
+                      <motion.div
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                        className="relative z-10 shrink-0 w-full max-w-[118px] lg:max-w-[132px]"
+                      >
+                        <Image
+                          src="/mockup.png"
+                          alt="StillHere memorial page for Margaret Lane shown on an iPhone"
+                          width={979}
+                          height={1964}
+                          className="relative w-full h-auto"
+                          priority
+                        />
+                      </motion.div>
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
             </div>
 
             <motion.div
-              className="hidden lg:flex justify-center lg:justify-end shrink-0 lg:mt-0 lg:translate-y-6 dark:hidden"
+              className="hidden xl:flex justify-center xl:justify-end shrink-0 xl:mt-0 xl:translate-y-6 dark:hidden"
               initial={{ opacity: 0, y: 32 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -307,8 +576,8 @@ export function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Scroll indicator — desktop only */}
-          <div className="hidden sm:flex shrink-0 pb-8 justify-center">
+          {/* Scroll indicator — xl desktop only */}
+          <div className="hidden xl:flex shrink-0 pb-8 justify-center">
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
@@ -325,7 +594,7 @@ export function LandingPage() {
         </div>
 
         <motion.div
-          className="lg:hidden absolute bottom-0 left-0 right-0 z-10 flex flex-col items-center dark:hidden -mb-px"
+          className="hero-tablet-mockup md:hidden xl:hidden absolute bottom-0 left-0 right-0 z-[15] flex flex-col items-center dark:hidden pointer-events-auto"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55, duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -333,7 +602,7 @@ export function LandingPage() {
           <Link
             href="/memorial/margaret-osullivan-1942-2024"
             aria-label="View the memorial demo"
-            className="group/mobile-demo block w-full max-lg:w-auto max-w-[min(100%,36rem)] mx-auto cursor-pointer leading-none active:scale-[0.98] transition-transform duration-200"
+            className="group/mobile-demo block w-full max-xl:w-auto max-w-[min(100%,36rem)] md:max-w-md lg:max-w-lg mx-auto cursor-pointer leading-none active:scale-[0.98] transition-transform duration-200"
           >
             <Image
               src="/mockupmobilenoshadow.png"
@@ -348,17 +617,17 @@ export function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section id="features" className="section-surface py-20 sm:py-28 px-6 relative">
-        <div className="max-w-5xl mx-auto">
+      <section id="features" className="section-surface py-16 md:py-20 lg:py-28 px-6 md:px-8 relative">
+        <div className="max-w-5xl md:max-w-6xl mx-auto">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-10 md:mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={stagger}
           >
             <motion.h2
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold"
+              className="font-serif text-2xl md:text-4xl lg:text-5xl font-bold"
               variants={fadeUp}
               custom={0}
             >
@@ -366,7 +635,9 @@ export function LandingPage() {
             </motion.h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          <MemoryAliveMobileCarousel items={memoryAliveFeatures} />
+
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
             {memoryAliveFeatures.map((feature, i) => (
               <motion.div
                 key={feature.title}
@@ -376,13 +647,7 @@ export function LandingPage() {
                 variants={fadeUp}
                 custom={i + 2}
               >
-                <div className="bg-card border border-border shadow-soft dark:border-primary/15 rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group select-none hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/[0.08] mb-5 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-serif text-xl sm:text-2xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{feature.description}</p>
-                </div>
+                <MemoryAliveCard feature={feature} index={i} />
               </motion.div>
             ))}
           </div>
@@ -390,11 +655,11 @@ export function LandingPage() {
       </section>
 
       {/* ── How it Works ── */}
-      <section className="section-surface-alt py-20 sm:py-28 px-6 relative overflow-hidden">
+      <section id="how-it-works" className="section-surface-alt py-20 sm:py-28 px-6 md:px-8 relative overflow-hidden">
         {/* Subtle decorative arc */}
         <div className="section-ambient absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
 
-        <div className="max-w-5xl mx-auto relative">
+        <div className="max-w-5xl md:max-w-6xl mx-auto relative">
           <motion.div
             className="text-center mb-16"
             initial="hidden"
@@ -411,7 +676,7 @@ export function LandingPage() {
             </motion.h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 lg:gap-14 relative">
             {/* Connector line (desktop only) — animates on scroll */}
             <motion.div
               className="hidden md:block absolute top-12 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-border to-transparent"
@@ -556,11 +821,11 @@ export function LandingPage() {
             <motion.div variants={fadeUp} custom={3}>
               <Button
                 size="lg"
-                onClick={handleCreate}
+                onClick={handleGetStarted}
                 className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-12 text-base rounded-full shadow-lg max-sm:shadow-md max-sm:shadow-primary/10 sm:btn-glow sm:glow-strong"
               >
                 <BookHeart className="w-4 h-4 mr-2" />
-                Get Started — It&apos;s Free
+                Get Started: It&apos;s Free
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </motion.div>
@@ -569,11 +834,11 @@ export function LandingPage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="section-surface-alt py-20 sm:py-28 px-6 relative overflow-hidden">
+      <section id="stories" className="section-surface-alt py-20 sm:py-28 px-6 md:px-8 relative overflow-hidden">
         <div className="section-ambient absolute top-0 right-0 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
         <div className="section-ambient absolute bottom-0 left-0 w-[300px] h-[300px] bg-flower/[0.02] rounded-full blur-[80px]" />
 
-        <div className="max-w-5xl mx-auto relative">
+        <div className="max-w-5xl md:max-w-6xl mx-auto relative">
           <motion.div
             className="text-center mb-16"
             initial="hidden"
@@ -597,27 +862,10 @@ export function LandingPage() {
             </motion.h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {[
-              {
-                quote: "StillHere gave us a beautiful space to remember Mom. The tributes from family around the world brought us so much comfort during a difficult time.",
-                name: "Sarah M.",
-                role: "Daughter",
-                icon: Heart,
-              },
-              {
-                quote: "I created a memorial for my best friend. Seeing the candles and flowers from people who loved him makes me feel like his memory will truly live on.",
-                name: "James L.",
-                role: "Friend",
-                icon: Flame,
-              },
-              {
-                quote: "The QR code feature is wonderful. We placed it on the service program and now everyone can revisit the memorial and share their own memories.",
-                name: "Maria K.",
-                role: "Granddaughter",
-                icon: Star,
-              },
-            ].map((testimonial, i) => (
+          <TestimonialsMobileCarousel items={testimonials} />
+
+          <div className="hidden md:grid md:grid-cols-3 gap-5 sm:gap-6">
+            {testimonials.map((testimonial, i) => (
               <motion.div
                 key={testimonial.name}
                 initial="hidden"
@@ -626,26 +874,7 @@ export function LandingPage() {
                 variants={fadeUp}
                 custom={i + 2}
               >
-                <div className="bg-card border border-border shadow-soft rounded-2xl p-6 sm:p-8 h-full transition-all duration-500 group relative hover:-translate-y-1 hover:border-primary/20 hover:shadow-elevated dark:hover:border-primary/30 dark:hover:shadow-[0_6px_24px_rgba(212,165,116,0.05)] dark:shadow-none select-none">
-                  <Quote className="absolute top-6 right-6 w-8 h-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
-                  <div className="flex items-center gap-1 mb-4">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className="w-3.5 h-3.5 fill-primary/80 text-primary/80" />
-                    ))}
-                  </div>
-                  <p className="text-sm sm:text-base leading-relaxed text-muted-foreground mb-6 relative z-10">
-                    &ldquo;{testimonial.quote}&rdquo;
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <testimonial.icon className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{testimonial.name}</p>
-                      <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </div>
+                <TestimonialCard testimonial={testimonial} />
               </motion.div>
             ))}
           </div>
@@ -653,20 +882,28 @@ export function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="section-surface py-10 px-6 border-t border-border mt-auto relative">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-serif text-xl font-semibold text-gradient-warm">StillHere</span>
-          <p className="text-sm text-muted-foreground/70">
-            Create a memorial for someone you love
-          </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCreate}
-            className="text-primary hover:text-primary/80 hover:bg-primary/5"
-          >
-            Get Started <ArrowRight className="ml-1 w-3 h-3" />
-          </Button>
+      <footer className="section-surface py-6 px-6 md:px-8 border-t border-border mt-auto relative">
+        <div className="max-w-5xl md:max-w-6xl mx-auto flex flex-nowrap items-center justify-between gap-4 text-sm">
+          <span className="font-serif text-xl font-semibold text-gradient-warm shrink-0">StillHere</span>
+          <nav className="flex items-center gap-x-3 text-muted-foreground shrink-0">
+            <button
+              type="button"
+              onClick={() => navigate({ page: "privacy" })}
+              className="hover:text-foreground transition-colors whitespace-nowrap"
+            >
+              Privacy Policy
+            </button>
+            <span aria-hidden="true" className="text-border">
+              ·
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate({ page: "terms" })}
+              className="hover:text-foreground transition-colors whitespace-nowrap"
+            >
+              Terms of Service
+            </button>
+          </nav>
         </div>
       </footer>
     </div>
