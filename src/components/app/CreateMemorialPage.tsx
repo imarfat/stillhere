@@ -187,7 +187,7 @@ export function CreateMemorialPage() {
                       <Upload className="w-6 h-6 text-primary/50 group-hover:text-primary/80 transition-colors" />
                     </div>
                     <span className="text-sm text-muted-foreground font-medium">Add cover photo</span>
-                    <span className="text-xs text-muted-foreground/60 mt-1">Optional — click or drag</span>
+                    <span className="text-xs text-muted-foreground/60 mt-1">Optional: click or drag</span>
                     <input
                       type="file"
                       accept="image/*"

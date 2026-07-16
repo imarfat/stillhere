@@ -112,7 +112,7 @@ export function DashboardPage() {
 
   const getDateRange = (dob: string | null, dod: string | null) => {
     if (dob && dod) {
-      return `${new Date(dob).getFullYear()} — ${new Date(dod).getFullYear()}`
+      return `${new Date(dob).getFullYear()} to ${new Date(dod).getFullYear()}`
     }
     if (dod) return new Date(dod).getFullYear().toString()
     return ""

@@ -24,7 +24,7 @@ function buildDateRange(dob?: string | null, dod?: string | null) {
   if (!dob && !dod) return null
   const dobFormatted = dob ? formatDate(dob) : ""
   const dodFormatted = dod ? formatDate(dod) : ""
-  if (dobFormatted && dodFormatted) return `${dobFormatted} — ${dodFormatted}`
+  if (dobFormatted && dodFormatted) return `${dobFormatted} to ${dodFormatted}`
   return dodFormatted || dobFormatted || null
 }
 
