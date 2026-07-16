@@ -10,6 +10,8 @@ export type AppRoute =
   | { page: "edit-memorial"; memorialId: string }
   | { page: "memorial"; slug: string }
   | { page: "settings" }
+  | { page: "privacy" }
+  | { page: "terms" }
 
 function syncUrlForRoute(route: AppRoute) {
   if (typeof window === "undefined") return

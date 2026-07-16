@@ -4,7 +4,7 @@ import { Toaster } from "sonner"
 import { Providers } from "@/components/auth-provider"
 
 export const metadata: Metadata = {
-  title: "StillHere — Digital Memorials",
+  title: "StillHere: Digital Memorials",
   description: "Create beautiful, lasting memorial pages for those you love. Share memories, photos, and tributes with family and friends.",
   keywords: ["memorial", "tribute", "remembrance", "obituary", "digital memorial"],
   icons: {

@@ -11,6 +11,9 @@ import { EditMemorialPage } from "./EditMemorialPage"
 import { MemorialPage } from "./MemorialPage"
 import { SettingsPage } from "./SettingsPage"
 import { ForgotPasswordPage } from "./ForgotPasswordPage"
+import { PrivacyPolicyPage } from "./PrivacyPolicyPage"
+import { TermsOfServicePage } from "./TermsOfServicePage"
+import { AppLoadingScreen } from "./AppLoadingScreen"
 import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
 
@@ -20,10 +23,24 @@ function routeKey(route: AppRoute) {
   return route.page
 }
 
+function isLegalPage(page: AppRoute["page"]) {
+  return page === "privacy" || page === "terms"
+}
+
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
   exit: { opacity: 0, y: -8, transition: { duration: 0.2 } },
+}
+
+function isLandingLegalHop(from: AppRoute["page"], to: AppRoute["page"]) {
+  return (from === "landing" && isLegalPage(to)) || (isLegalPage(from) && to === "landing")
+}
+
+const instantPageVariants = {
+  initial: { opacity: 1, y: 0 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, transition: { duration: 0 } },
 }
 
 export function AppShell() {
@@ -31,6 +48,11 @@ export function AppShell() {
   const { data: session, status } = useSession()
   const hydrated = useRef(false)
   const hasNavigatedOnce = useRef(false)
+  const previousPage = useRef<AppRoute["page"]>(route.page)
+  const scrollAfterExit = useRef(false)
+
+  const skipPageTransition =
+    isLegalPage(route.page) || isLegalPage(previousPage.current)
 
   useEffect(() => {
     hydrated.current = true
@@ -57,8 +79,19 @@ export function AppShell() {
   useEffect(() => {
     if (!hydrated.current) return
     hasNavigatedOnce.current = true
-    window.scrollTo(0, 0)
+
+    if (previousPage.current !== route.page) {
+      scrollAfterExit.current = true
+    }
+
+    previousPage.current = route.page
   }, [route.page])
+
+  const handleExitComplete = () => {
+    if (!scrollAfterExit.current) return
+    scrollAfterExit.current = false
+    window.scrollTo(0, 0)
+  }
 
   useEffect(() => {
     if (!hydrated.current) return
@@ -94,6 +127,10 @@ export function AppShell() {
         return <MemorialPage slug={route.slug} />
       case "settings":
         return <SettingsPage />
+      case "privacy":
+        return <PrivacyPolicyPage />
+      case "terms":
+        return <TermsOfServicePage />
       default:
         return <LandingPage />
     }
@@ -101,19 +138,17 @@ export function AppShell() {
 
   // Show a skeleton while session is loading to prevent flash
   if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-      </div>
-    )
+    return <AppLoadingScreen />
   }
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
       <motion.div
         key={routeKey(route)}
-        variants={pageVariants}
-        initial={hasNavigatedOnce.current ? false : "initial"}
+        variants={skipPageTransition ? instantPageVariants : pageVariants}
+        initial={
+          skipPageTransition ? false : hasNavigatedOnce.current ? false : "initial"
+        }
         animate="animate"
         exit="exit"
         className="min-h-screen flex flex-col"
