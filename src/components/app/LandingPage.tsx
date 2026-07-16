@@ -255,7 +255,7 @@ function MemoryAliveCard({ feature, index }: { feature: MemoryAliveFeature; inde
 function MemoryAliveMobileCarousel({ items }: { items: readonly MemoryAliveFeature[] }) {
   return (
     <motion.div
-      className="md:hidden pb-2"
+      className="md:hidden pb-8"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-40px" }}
@@ -401,7 +401,7 @@ export function LandingPage() {
               <div className="w-full max-xl:max-w-md max-xl:mx-auto md:max-w-none flex flex-col">
                 <div className="hero-mobile-message flex flex-col max-xl:gap-5 mb-10 max-xl:mb-5 xl:mb-12">
                   <motion.p
-                    className="hero-subline mb-4 max-xl:mb-0 max-w-md mx-auto xl:mx-0 dark:xl:mx-auto"
+                    className="hero-subline mb-4 max-xl:mb-0 w-full max-xl:max-w-none max-w-md mx-auto xl:max-w-xl xl:mx-0 dark:xl:mx-auto"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.35, duration: 0.8 }}
